@@ -1,0 +1,3088 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grupo Rafael Thomaz - CRM, Agendamentos & Coleta de Dados</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter, Montserrat & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            brand: ['Montserrat', 'sans-serif'],
+          },
+          colors: {
+            thomaz: {
+              navy: '#254B77',
+              navyDark: '#16294f',
+              navyDeep: '#0f1e3d',
+              navyLight: '#356399',
+              pink: '#F05CB5',
+              pinkDark: '#D83999',
+              pinkLight: '#FDF2F9',
+              slate: '#f8fafc'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    .pulse-dot {
+      animation: pulseAnimation 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulseAnimation {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.1); }
+    }
+
+    .radio-option:has(input:checked) {
+      border-color: #F05CB5;
+      background-color: #FDF2F9;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-pink-100 selection:text-thomaz-pinkDark">
+
+  <!-- Tela de Login -->
+  <div id="loginScreen" class="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-thomaz-navyDeep via-thomaz-navy to-thomaz-navyLight">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="px-6 pt-8 pb-6 text-center border-b border-slate-100">
+        <img src="4.png" alt="Grupo Rafael Thomaz" class="h-12 w-auto object-contain mx-auto mb-3" onerror="this.classList.add('!hidden'); document.getElementById('loginLogoFallback').classList.remove('hidden');">
+        <div id="loginLogoFallback" class="hidden flex-col items-center justify-center gap-1 mb-3">
+          <svg class="w-10 h-10 mx-auto" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 54L60 30L80 54" stroke="#254B77" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M84 48L90 38" stroke="#254B77" stroke-width="10" stroke-linecap="round"/>
+            <path d="M30 54L60 92L90 54H48L40 66H76" stroke="#F05CB5" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h1 class="font-brand font-black text-sm text-thomaz-navy tracking-wider">GRUPO RAFAEL THOMAZ</h1>
+        <p class="text-[11px] text-slate-500 font-medium mt-0.5">Acesso ao sistema de CRM</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" class="p-6 space-y-3">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Usuário</label>
+          <input type="text" id="loginUsername" required autocomplete="username" placeholder="Seu nome de usuário" class="w-full text-sm py-2.5 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Senha</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password" placeholder="Sua senha" class="w-full text-sm py-2.5 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+        </div>
+
+        <div id="loginError" class="hidden text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+          Usuário ou senha inválidos.
+        </div>
+
+        <button type="submit" class="w-full py-2.5 text-sm font-bold text-white bg-thomaz-pink hover:bg-thomaz-pinkDark rounded-lg shadow-sm shadow-pink-500/20 transition active:scale-95">
+          <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Entrar
+        </button>
+
+        <p class="text-[10px] text-slate-400 text-center pt-1">
+          Esqueceu sua senha? Fale com o Administrador da sua equipe.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <div id="appRoot" class="hidden">
+
+  <header class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20 gap-3">
+        
+        <!-- Logo Grupo Rafael Thomaz -->
+        <div class="flex items-center gap-3">
+          <img src="4.png" alt="Grupo Rafael Thomaz" class="h-11 w-auto object-contain hidden sm:block" onerror="this.classList.add('!hidden'); document.getElementById('logoSvgFallback').classList.remove('hidden');">
+          
+          <div id="logoSvgFallback" class="flex items-center gap-2.5">
+            <svg class="w-9 h-9 flex-shrink-0" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M40 54L60 30L80 54" stroke="#254B77" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M84 48L90 38" stroke="#254B77" stroke-width="10" stroke-linecap="round"/>
+              <path d="M30 54L60 92L90 54H48L40 66H76" stroke="#F05CB5" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="flex flex-col">
+              <span class="font-brand font-extrabold text-[14px] sm:text-base text-thomaz-navy tracking-wider leading-none">GRUPO</span>
+              <span class="font-brand font-black text-[11px] sm:text-xs text-thomaz-pink tracking-widest leading-tight uppercase">RAFAEL THOMAZ</span>
+            </div>
+          </div>
+          
+          <div class="hidden lg:block h-6 w-[1px] bg-slate-200 ml-1"></div>
+          
+          <!-- Badge de Visão Ativa (Admin vs Usuário) -->
+          <div id="viewModeBadge" class="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Barra de Ações e Troca de Usuário -->
+        <div class="flex items-center gap-2 sm:gap-2.5">
+
+          <!-- Conexão com Google Planilha Status -->
+          <button onclick="openGoogleSyncModal()" id="googleSyncButton" class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs" title="Configurar envio automático para o Google Sheets">
+            <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <span id="googleSyncText" class="hidden xl:inline">Google Planilhas</span>
+            <span id="googleSyncIndicator" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          </button>
+
+          <!-- Conexão com Office 365 / Excel Online Status -->
+          <button onclick="openOffice365SyncModal()" id="office365SyncButton" class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 transition shadow-2xs" title="Configurar envio automático para o Excel Online / SharePoint (Office 365)">
+            <i class="fa-brands fa-microsoft text-sky-700"></i>
+            <span id="office365SyncText" class="hidden xl:inline">Office 365</span>
+            <span id="office365SyncIndicator" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          </button>
+
+          <!-- Seletor de Perfil / Usuário -->
+          <div class="relative flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
+            <button onclick="openSwitchUserModal()" class="flex items-center gap-2 px-2.5 py-1 text-xs font-bold text-slate-800 hover:text-thomaz-navy transition">
+              <div id="userAvatarBadge" class="w-6 h-6 rounded-full bg-thomaz-navy text-white flex items-center justify-center text-[10px] font-black">
+                A
+              </div>
+              <div class="text-left hidden sm:block">
+                <span id="userNameLabel" class="block text-xs font-bold leading-none text-slate-900">Rafael Thomaz</span>
+                <span id="userRoleLabel" class="block text-[10px] font-medium text-slate-500 leading-tight">Administrador</span>
+              </div>
+              <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 ml-0.5"></i>
+            </button>
+          </div>
+
+          <!-- Botão Gerenciar Equipe (Apenas para Administrador) -->
+          <button id="adminTeamBtn" onclick="openTeamModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition shadow-2xs">
+            <i class="fa-solid fa-users-gear text-thomaz-navy"></i>
+            <span class="hidden md:inline">Equipe</span>
+          </button>
+
+          <!-- Botão Novo Agendamento -->
+          <button onclick="openAppointmentModal()" class="flex items-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-thomaz-pink hover:bg-thomaz-pinkDark rounded-lg shadow-sm shadow-pink-500/20 transition active:scale-95">
+            <i class="fa-solid fa-plus"></i>
+            <span class="hidden xs:inline">Novo Agendamento</span>
+            <span class="xs:hidden">Novo</span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="flex items-center space-x-1 sm:space-x-2 border-t border-slate-100 py-2.5 overflow-x-auto text-xs">
+        <button onclick="switchAppTab('tab-agendamentos')" id="nav-tab-agendamentos" class="app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 bg-thomaz-navy text-white transition">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>Agendamentos Comerciais</span>
+        </button>
+
+        <button onclick="switchAppTab('tab-coleta-mei')" id="nav-tab-coleta-mei" class="app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 text-slate-600 hover:text-thomaz-navy hover:bg-slate-100 transition">
+          <i class="fa-solid fa-id-card"></i>
+          <span>Prestação de Serviços</span>
+        </button>
+
+        <button onclick="switchAppTab('tab-diagnostico')" id="nav-tab-diagnostico" class="app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 text-slate-600 hover:text-thomaz-navy hover:bg-slate-100 transition">
+          <i class="fa-solid fa-calculator"></i>
+          <span>Diagnóstico & Simulador</span>
+        </button>
+
+        <!-- ABA EXCLUSIVA DO ADMINISTRADOR: DADOS COLETADOS CONFIDENCIAIS -->
+        <button onclick="switchAppTab('tab-confidencial')" id="nav-tab-confidencial" class="app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 text-amber-800 bg-amber-50 border border-amber-300 hover:bg-amber-100 transition">
+          <i class="fa-solid fa-shield-halved text-amber-600"></i>
+          <span>Dados Coletados</span>
+          <span class="text-[9px] bg-amber-200 text-amber-900 font-extrabold px-1.5 py-0.5 rounded uppercase">Admin</span>
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- Banner Informativo Google Sheets -->
+  <div id="googleSheetsNoticeBanner" class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white text-xs px-4 py-2 border-b border-emerald-800 shadow-xs flex items-center justify-between">
+    <div class="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-200"></span>
+        </span>
+        <span class="font-semibold">Sincronização Direta com Google Planilhas Habilitada!</span>
+        <span class="text-emerald-100 hidden md:inline">Agendamentos e formulários podem ser enviados diretamente para a planilha da empresa.</span>
+      </div>
+      <button onclick="openGoogleSyncModal()" class="text-[11px] font-bold bg-white text-emerald-800 hover:bg-emerald-50 px-3 py-1 rounded-md shadow-xs transition flex-shrink-0">
+        <i class="fa-solid fa-plug mr-1"></i> Configurar Link
+      </button>
+    </div>
+  </div>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <section id="tab-agendamentos" class="space-y-6">
+      <!-- Header do Contexto do Usuário / Boas-vindas -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+        <div>
+          <h1 id="welcomeTitle" class="text-base sm:text-lg font-black text-thomaz-navy flex items-center gap-2">
+            Painel de Controle
+          </h1>
+          <p id="welcomeSubtitle" class="text-xs text-slate-500">
+            Gerencie e acompanhe o fluxo de prospecções comerciais da sua empresa.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <div id="userRoleIndicatorTag" class="px-2.5 py-1 rounded-lg text-xs font-bold border">
+            <!-- Dynamically populated -->
+          </div>
+          <button onclick="openSwitchUserModal()" class="text-xs font-semibold text-thomaz-navy hover:underline px-2 py-1">
+            <i class="fa-solid fa-circle-user mr-1"></i> Minha Conta
+          </button>
+        </div>
+      </div>
+      
+      <!-- Estatísticas Dinâmicas -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs border-l-4 border-l-thomaz-navy">
+          <div class="flex items-center justify-between">
+            <div>
+              <p id="statLabelTotal" class="text-xs font-medium text-slate-500">Total de Agendamentos</p>
+              <h3 id="statTotal" class="text-2xl font-black text-thomaz-navy mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-slate-100 text-thomaz-navy flex items-center justify-center text-lg">
+              <i class="fa-solid fa-calendar-days"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs border-l-4 border-l-thomaz-pink">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-medium text-slate-500">Reuniões Marcadas Hoje</p>
+              <h3 id="statToday" class="text-2xl font-black text-thomaz-pink mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-pink-50 text-thomaz-pink flex items-center justify-center text-lg">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs border-l-4 border-l-emerald-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs font-medium text-slate-500">Reuniões Realizadas</p>
+              <h3 id="statCompleted" class="text-2xl font-black text-emerald-600 mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs border-l-4 border-l-indigo-500">
+          <div class="flex items-center justify-between">
+            <div>
+              <p id="statLabelContext" class="text-xs font-medium text-slate-500">Membros Ativos</p>
+              <h3 id="statContextValue" class="text-2xl font-black text-indigo-600 mt-1">0</h3>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+              <i id="statContextIcon" class="fa-solid fa-users"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtros e Busca -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-3">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-3">
+          <div class="relative w-full lg:w-96">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="searchInput" oninput="renderTable()" placeholder="Buscar por Nome, CNPJ, Telefone ou Motivo..." class="w-full pl-9 pr-4 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+            <div id="filterMemberContainer" class="flex items-center gap-1.5 text-xs text-slate-600">
+              <label for="filterMember" class="font-medium text-slate-500">Membro:</label>
+              <select id="filterMember" onchange="renderTable()" class="py-1.5 px-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-1 focus:ring-thomaz-navy">
+                <option value="ALL">Toda a Equipe</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-xs text-slate-600">
+              <label for="filterStatus" class="font-medium text-slate-500">Status:</label>
+              <select id="filterStatus" onchange="renderTable()" class="py-1.5 px-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-1 focus:ring-thomaz-navy">
+                <option value="ALL">Todos os Status</option>
+                <option value="Agendada">Agendada</option>
+                <option value="Confirmada">Confirmada</option>
+                <option value="Realizada">Realizada</option>
+                <option value="No-Show">No-Show (Faltou)</option>
+                <option value="Cancelada">Cancelada</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1.5 text-xs text-slate-600">
+              <label for="filterPeriod" class="font-medium text-slate-500">Data:</label>
+              <select id="filterPeriod" onchange="renderTable()" class="py-1.5 px-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs font-medium focus:ring-1 focus:ring-thomaz-navy">
+                <option value="ALL">Todas as Datas</option>
+                <option value="TODAY">Reuniões de Hoje</option>
+                <option value="WEEK">Próximos 7 Dias</option>
+                <option value="FUTURE">Todas as Futuras</option>
+              </select>
+            </div>
+
+            <button onclick="resetFilters()" class="p-2 text-xs text-slate-400 hover:text-slate-600 rounded-lg border border-slate-200 hover:bg-slate-100" title="Limpar Filtros">
+              <i class="fa-solid fa-arrow-rotate-left"></i>
+            </button>
+
+            <!-- Botão Exportar CSV (Admin) -->
+            <button id="adminExportBtn" onclick="exportToCSV()" class="hidden md:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition shadow-2xs" title="Exportar CSV">
+              <i class="fa-solid fa-download text-slate-500"></i>
+              <span>Exportar CSV</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela com Colunas da Foto -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden flex flex-col">
+        <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-thomaz-pink"></span>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-thomaz-navy">
+              CONTROLE DE AGENDAMENTOS
+            </h2>
+            <span id="currentTableModeTag" class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-200 text-slate-700">
+              Visão Geral
+            </span>
+          </div>
+          
+          <div class="flex items-center gap-2">
+            <span id="resultsCountBadge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">
+              0 registros
+            </span>
+            <button onclick="openAppointmentModal()" class="text-xs font-bold text-thomaz-pink hover:text-thomaz-pinkDark flex items-center gap-1">
+              <i class="fa-solid fa-plus-circle"></i> Adicionar
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto min-h-[360px]">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100/90 border-b border-slate-200 text-slate-700 uppercase text-[11px] font-bold tracking-wider">
+                <th id="thResponsavel" class="py-3 px-4">Responsável</th>
+                <th class="py-3 px-4 min-w-[170px]">Nome</th>
+                <th class="py-3 px-4 min-w-[150px]">CNPJ</th>
+                <th class="py-3 px-4 min-w-[150px]">Telefone (Discador)</th>
+                <th class="py-3 px-4 min-w-[150px]">Whatsapp</th>
+                <th class="py-3 px-4 whitespace-nowrap">Data Reunião</th>
+                <th class="py-3 px-4 whitespace-nowrap">Horario</th>
+                <th class="py-3 px-4 min-w-[220px]">Motivo da Reunião</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="appointmentsTableBody" class="divide-y divide-slate-200 text-slate-700">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-16 px-4 text-center">
+          <div class="w-14 h-14 rounded-full bg-pink-50 text-thomaz-pink flex items-center justify-center text-2xl mb-3">
+            <i class="fa-regular fa-calendar-xmark"></i>
+          </div>
+          <h4 class="text-sm font-bold text-slate-800">Nenhum agendamento encontrado</h4>
+          <p id="emptyStateMsg" class="text-xs text-slate-500 max-w-sm mt-1">
+            Nenhuma reunião encontrada para este filtro. Cadastre uma nova prospecção!
+          </p>
+          <button onclick="openAppointmentModal()" class="mt-4 px-4 py-2 text-xs font-bold text-white bg-thomaz-navy hover:bg-thomaz-navyDark rounded-lg transition shadow-sm">
+            <i class="fa-solid fa-plus mr-1.5"></i> Cadastrar Nova Reunião
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-coleta-mei" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
+        
+        <!-- Banner Header do Formulário -->
+        <div class="bg-thomaz-navyDeep text-white p-6 sm:p-8 relative overflow-hidden">
+          <div class="relative z-10 max-w-2xl">
+            <span class="text-xs font-bold uppercase tracking-widest text-pink-300 block mb-1">GRUPO RAFAEL THOMAZ · CONTABILIDADE & CONSULTORIA</span>
+            <h2 class="text-xl sm:text-2xl font-black text-white">Formulário para Prestação de Serviços</h2>
+            <p class="text-xs text-slate-300 mt-2">
+              Preencha com atenção os dados do titular e da atividade. Os dados preenchidos são confidenciais e tratados com sigilo profissional pelo Administrador.
+            </p>
+          </div>
+          <div class="absolute -right-10 -bottom-10 w-48 h-48 rounded-full bg-thomaz-pink opacity-20 pointer-events-none"></div>
+        </div>
+
+        <!-- Barra de Progresso Visual -->
+        <div class="bg-slate-100 px-6 py-3 border-b border-slate-200 flex flex-wrap gap-4 text-xs font-bold text-slate-600">
+          <span class="text-thomaz-pink"><i class="fa-solid fa-circle-check mr-1"></i> 1. Acesso gov.br</span>
+          <span>• 2. Dados Pessoais</span>
+          <span>• 3. Dados do Negócio</span>
+          <span>• 4. Estrangeiros (Opcional)</span>
+        </div>
+
+        <!-- Formulário Prestação de Serviços -->
+        <form id="formColetaMei" onsubmit="submitFormMei(event)" class="p-6 sm:p-8 space-y-8">
+          
+          <!-- SEÇÃO 1: Requisitos de Acesso Gov.br -->
+          <div>
+            <div class="border-l-4 border-thomaz-pink pl-3 mb-3">
+              <h3 class="text-sm font-bold text-thomaz-navy">1. Requisitos de Acesso (Conta gov.br)</h3>
+              <p class="text-xs text-slate-500">É necessário possuir acesso à conta gov.br com CPF e senha cadastrados.</p>
+            </div>
+            
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+              <label class="block text-xs font-bold text-slate-700">Nível da sua conta gov.br <span class="text-rose-500">*</span></label>
+              <div class="space-y-2">
+                <label class="radio-option flex items-start gap-3 p-3 rounded-lg border border-slate-300 bg-white cursor-pointer text-xs transition">
+                  <input type="radio" name="mei_nivelGov" value="Prata ou Ouro" required class="mt-0.5 text-thomaz-pink focus:ring-thomaz-pink">
+                  <div>
+                    <strong class="text-slate-900 block">Prata ou Ouro</strong>
+                    <span class="text-slate-500">Nível recomendado oficial, sem etapas extras necessárias.</span>
+                  </div>
+                </label>
+                <label class="radio-option flex items-start gap-3 p-3 rounded-lg border border-slate-300 bg-white cursor-pointer text-xs transition">
+                  <input type="radio" name="mei_nivelGov" value="Bronze" class="mt-0.5 text-thomaz-pink focus:ring-thomaz-pink">
+                  <div>
+                    <strong class="text-slate-900 block">Bronze</strong>
+                    <span class="text-slate-500">Se for estrangeiro(a), preencha também a Seção 4 abaixo.</span>
+                  </div>
+                </label>
+                <label class="radio-option flex items-start gap-3 p-3 rounded-lg border border-slate-300 bg-white cursor-pointer text-xs transition">
+                  <input type="radio" name="mei_nivelGov" value="Não sei / preciso de ajuda" class="mt-0.5 text-thomaz-pink focus:ring-thomaz-pink">
+                  <div>
+                    <strong class="text-slate-900 block">Não sei / Preciso de ajuda</strong>
+                    <span class="text-slate-500">Nossa equipe contábil entrará em contato para auxiliar.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 2: Dados Pessoais do Titular -->
+          <div>
+            <div class="border-l-4 border-thomaz-pink pl-3 mb-3">
+              <h3 class="text-sm font-bold text-thomaz-navy">2. Dados Pessoais do Titular</h3>
+              <p class="text-xs text-slate-500">Dados cadastrais do proprietário para o registro mercantil.</p>
+            </div>
+
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Nome Completo <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_nome" required placeholder="Nome e sobrenome" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">RG ou CNH (Número, Órgão e Emissão) <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_doc" required placeholder="Ex: 12.345.678-9, SSP/SP, 10/03/2018" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Telefone / Celular <span class="text-rose-500">*</span></label>
+                  <input type="tel" id="mei_telefone" required oninput="maskPhone(this)" placeholder="(00) 00000-0000" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">E-mail Pessoal <span class="text-rose-500">*</span></label>
+                  <input type="email" id="mei_email" required placeholder="seuemail@exemplo.com" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Endereço Residencial (Rua, Número e Complemento) <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_endereco" required placeholder="Ex: Rua das Flores, 120, Apto 32" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">CEP <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_cep" required placeholder="00000-000" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Bairro <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_bairro" required placeholder="Bairro" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Cidade <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_cidade" required placeholder="Cidade" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Estado (UF) <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_estado" required maxlength="2" placeholder="Ex: SP" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy uppercase">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 3: Dados do Negócio -->
+          <div>
+            <div class="border-l-4 border-thomaz-pink pl-3 mb-3">
+              <h3 class="text-sm font-bold text-thomaz-navy">3. Dados do Negócio</h3>
+              <p class="text-xs text-slate-500">As informações desta seção serão públicas nos órgãos competentes.</p>
+            </div>
+
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Atividade Principal e Secundárias <span class="text-rose-500">*</span></label>
+                <textarea id="mei_atividades" required rows="2" placeholder="Descreva a atividade que irá exercer (ex: consultoria em TI, comércio varejista de roupas, manicure, etc.)" class="w-full text-xs p-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy"></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Forma de Atuação <span class="text-rose-500">*</span></label>
+                  <select id="mei_formaAtuacao" required class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy font-medium">
+                    <option value="">Selecione...</option>
+                    <option value="Estabelecimento fixo">Estabelecimento fixo</option>
+                    <option value="Internet">Internet / E-commerce</option>
+                    <option value="Porta a porta">Porta a porta</option>
+                    <option value="Ambulante">Ambulante</option>
+                    <option value="Outra">Outra</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">E-mail Profissional (Público) <span class="text-rose-500">*</span></label>
+                  <input type="email" id="mei_emailprof" required placeholder="contato@empresa.com" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Telefone Comercial (Público) <span class="text-rose-500">*</span></label>
+                  <input type="tel" id="mei_telprof" required oninput="maskPhone(this)" placeholder="(00) 00000-0000" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Endereço Comercial <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_endcom" required placeholder='Escreva "Idem" se for o mesmo endereço residencial' class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">CEP Comercial <span class="text-rose-500">*</span></label>
+                  <input type="text" id="mei_cepcom" required placeholder="00000-000 ou Idem" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEÇÃO 4: Estrangeiros (Opcional) -->
+          <div>
+            <div class="border-l-4 border-slate-400 pl-3 mb-3">
+              <h3 class="text-sm font-bold text-slate-700">4. Identificação Civil — Exclusivo para Estrangeiros</h3>
+              <p class="text-xs text-slate-500">Obrigatório apenas para estrangeiros com conta gov.br Bronze.</p>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <label class="flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                <input type="checkbox" id="mei_souEstrangeiro" onchange="toggleEstrangeiroPanel(this.checked)" class="text-thomaz-pink rounded focus:ring-thomaz-pink h-4 w-4">
+                <span>Sou estrangeiro(a) e preciso preencher esta seção</span>
+              </label>
+
+              <div id="painelEstrangeiro" class="hidden pt-3 border-t border-slate-200 space-y-3">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">País de Nacionalidade</label>
+                  <input type="text" id="mei_pais" placeholder="Conforme documento" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Tipo de Documento emitido pela Polícia Federal</label>
+                  <select id="mei_tipoDocPF" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white">
+                    <option value="">Selecione...</option>
+                    <option value="Carteira Nacional de Registro Migratório">Carteira Nacional de Registro Migratório</option>
+                    <option value="Documento Provisório de Registro Nacional Migratório">Documento Provisório de Registro Nacional Migratório</option>
+                    <option value="Protocolo de Solicitação de Refúgio">Protocolo de Solicitação de Refúgio</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Número do Documento</label>
+                  <input type="text" id="mei_numDocPF" placeholder="Número do registro" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p class="text-xs text-slate-500">
+              <i class="fa-solid fa-lock text-emerald-600 mr-1"></i>
+              Dados protegidos. Apenas o <strong>Administrador</strong> tem acesso ao painel de respostas.
+            </p>
+            <button type="submit" class="w-full sm:w-auto px-6 py-3 text-xs font-extrabold text-white bg-thomaz-pink hover:bg-thomaz-pinkDark rounded-xl shadow-md transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Enviar Formulário de Coleta</span>
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Sucesso do Envio MEI -->
+        <div id="sucessoMeiCard" class="hidden p-12 text-center space-y-4">
+          <div class="w-16 h-16 rounded-full bg-pink-50 text-thomaz-pink flex items-center justify-center text-3xl mx-auto">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          <h3 class="text-lg font-black text-thomaz-navy">Formulário Recebido com Sucesso!</h3>
+          <p class="text-xs text-slate-600 max-w-md mx-auto">
+            Os dados de abertura/migração foram armazenados com segurança e estão disponíveis exclusivamente para a diretoria administrativa.
+          </p>
+          <div class="inline-block bg-slate-100 border border-slate-200 px-4 py-2 rounded-lg text-xs text-slate-700">
+            Protocolo: <span id="protocoloGeradoMei" class="font-mono font-bold text-thomaz-navy">PS-2026</span>
+          </div>
+          <div class="pt-3">
+            <button onclick="resetFormMei()" class="px-5 py-2 text-xs font-bold text-thomaz-navy bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+              Preencher Novo Formulário
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="tab-diagnostico" class="hidden space-y-6">
+      <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-xs border border-slate-200">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-200 gap-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-thomaz-pink block">QUESTIONÁRIO DE QUALIFICAÇÃO & PROPOSTA</span>
+            <h2 class="text-xl sm:text-2xl font-black text-thomaz-navy flex items-center gap-2 mt-0.5">
+              <i class="fa-solid fa-clipboard-check text-thomaz-pink"></i>
+              Diagnóstico Comercial & Simulador
+            </h2>
+            <p class="text-xs text-slate-500 mt-1">Preencha os dados do cliente para gerar a proposta oficial e arquivar para a gestão.</p>
+          </div>
+          
+          <button onclick="resetDiagnosticoForm()" class="text-xs font-semibold text-slate-400 hover:text-thomaz-pink transition flex items-center gap-1">
+            <i class="fa-solid fa-rotate-left"></i> Limpar Formulário
+          </button>
+        </div>
+
+        <form id="formDiagnosticoComercial" onsubmit="processarDiagnosticoComercial(event)" class="space-y-6">
+          
+          <!-- BLOCO 1: IDENTIFICAÇÃO DO CLIENTE -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-thomaz-navy mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-thomaz-navy text-white text-[10px] flex items-center justify-center font-bold">1</span>
+              Informações do Cliente / Empresa
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Nome Completo / Razão Social <span class="text-rose-500">*</span></label>
+                <input type="text" id="diag_nome" required placeholder="Ex: Rodrigo Silva - TecnoSoluções LTDA" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Telefone / WhatsApp <span class="text-rose-500">*</span></label>
+                <input type="tel" id="diag_telefone" required oninput="maskPhone(this)" placeholder="(00) 00000-0000" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCO 2: SITUAÇÃO DA EMPRESA -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-thomaz-navy mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-thomaz-navy text-white text-[10px] flex items-center justify-center font-bold">2</span>
+              Situação da Empresa
+            </h3>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-2">O cliente já possui empresa (CNPJ ativo)? <span class="text-rose-500">*</span></label>
+                <div class="flex items-center gap-6 text-xs font-medium">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="diag_possuiEmpresa" value="sim" checked onchange="toggleDiagEmpresa(true)" class="text-thomaz-pink focus:ring-thomaz-pink">
+                    <span>Sim, já possui empresa</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="diag_possuiEmpresa" value="nao" onchange="toggleDiagEmpresa(false)" class="text-thomaz-pink focus:ring-thomaz-pink">
+                    <span>Não, deseja abrir nova empresa</span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="diag_boxPossuiEmpresa" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">CNPJ da Empresa</label>
+                  <input type="text" id="diag_cnpj" oninput="maskCNPJ(this)" placeholder="00.000.000/0001-00" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-thomaz-navy">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Possui Contador Atualmente?</label>
+                  <select id="diag_possuiContador" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white font-medium">
+                    <option value="Troca de contabilidade">Sim, busca troca de contabilidade</option>
+                    <option value="Sem assessoria">Não, está sem assessoria no momento</option>
+                    <option value="Insatisfeito">Sim, insatisfeito com escritório atual</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="diag_boxNaoPossuiEmpresa" class="hidden">
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Ramo de Atividade Pretendido</label>
+                <input type="text" id="diag_ramoAbertura" placeholder="Ex: Prestação de serviços de TI, Clínica médica..." class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white">
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCO 3: REGIME, FATURAMENTO E NOTAS -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-thomaz-navy mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-thomaz-navy text-white text-[10px] flex items-center justify-center font-bold">3</span>
+              Regime Tributário & Faturamento
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Regime Tributário</label>
+                <select id="diag_regime" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white font-medium">
+                  <option value="simples-baixa">Simples Nacional — Baixa Movimentação</option>
+                  <option value="simples-media" selected>Simples Nacional — Média Movimentação</option>
+                  <option value="simples-alta">Simples Nacional — Alta Movimentação</option>
+                  <option value="mei-basico">MEI — Acompanhamento Básico</option>
+                  <option value="mei-medio">MEI — Maior Movimentação / NFs</option>
+                  <option value="lp-baixa">Lucro Presumido — Baixa</option>
+                  <option value="lp-media">Lucro Presumido — Média</option>
+                  <option value="lp-alta">Lucro Presumido — Alta</option>
+                  <option value="lr-baixa">Lucro Real — Baixa Complexidade</option>
+                  <option value="lr-media">Lucro Real — Média Complexidade</option>
+                  <option value="lr-alta">Lucro Real — Alta Complexidade</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Faturamento Médio Mensal</label>
+                <select id="diag_faturamento" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white font-medium">
+                  <option value="Até R$ 10.000">Até R$ 10.000 / mês</option>
+                  <option value="R$ 10.000 a R$ 30.000" selected>R$ 10.000 a R$ 30.000 / mês</option>
+                  <option value="R$ 30.000 a R$ 80.000">R$ 30.000 a R$ 80.000 / mês</option>
+                  <option value="R$ 80.000 a R$ 150.000">R$ 80.000 a R$ 150.000 / mês</option>
+                  <option value="Acima de R$ 150.000">Acima de R$ 150.000 / mês</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Volume de Notas Fiscais</label>
+                <select id="diag_notas" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white font-medium">
+                  <option value="Eventual / Não emite">Eventual / Não emite</option>
+                  <option value="1 a 10 NFs/mês">1 a 10 NFs / mês</option>
+                  <option value="11 a 30 NFs/mês" selected>11 a 30 NFs / mês</option>
+                  <option value="31 a 100 NFs/mês">31 a 100 NFs / mês</option>
+                  <option value="Acima de 100 NFs/mês">Acima de 100 NFs / mês</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCO 4: FUNCIONÁRIOS & REGULARIZAÇÃO -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-thomaz-navy mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-thomaz-navy text-white text-[10px] flex items-center justify-center font-bold">4</span>
+              Departamento Pessoal & Regularização
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Funcionários Ativos em Folha</label>
+                <select id="diag_funcionarios" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white font-medium">
+                  <option value="0">Sem funcionários (Apenas sócios / Pró-labore)</option>
+                  <option value="1-5">1 a 5 Funcionários</option>
+                  <option value="6-10">6 a 10 Funcionários</option>
+                  <option value="11-20">11 a 20 Funcionários</option>
+                  <option value="21+">Acima de 20 Funcionários</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Necessita Regularização Fiscal?</label>
+                <select id="diag_regularizar" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 bg-white font-medium">
+                  <option value="Não">Não / Empresa Regular ou Abertura</option>
+                  <option value="Simples">Sim, Regularização Simples / Declarações</option>
+                  <option value="Média">Sim, Débitos / Parcelamentos</option>
+                  <option value="Complexa">Sim, Pendências na PGFN / Dívida Ativa</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLOCO 5: MÓDULOS EXTRAS & OBSERVAÇÕES -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-thomaz-navy mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-thomaz-navy text-white text-[10px] flex items-center justify-center font-bold">5</span>
+              Serviços Adicionais Desejados
+            </h3>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3 text-xs">
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                <input type="checkbox" id="diag_mod_bpo" class="text-thomaz-pink rounded focus:ring-thomaz-pink">
+                <span class="font-medium text-slate-700">BPO Financeiro</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                <input type="checkbox" id="diag_mod_consultoria" class="text-thomaz-pink rounded focus:ring-thomaz-pink">
+                <span class="font-medium text-slate-700">Consultoria de Gestão</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                <input type="checkbox" id="diag_mod_planejamento" class="text-thomaz-pink rounded focus:ring-thomaz-pink">
+                <span class="font-medium text-slate-700">Planejamento Tributário</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                <input type="checkbox" id="diag_mod_alteracao" class="text-thomaz-pink rounded focus:ring-thomaz-pink">
+                <span class="font-medium text-slate-700">Alteração de Sócios / QSA</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer">
+                <input type="checkbox" id="diag_mod_migracao" class="text-thomaz-pink rounded focus:ring-thomaz-pink">
+                <span class="font-medium text-slate-700">Migração de MEI para ME</span>
+              </label>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Observações ou Necessidades Específicas:</label>
+              <textarea id="diag_observacoes" rows="2" placeholder="Observações do lead, datas previstas, urgência..." class="w-full text-xs p-3 rounded-lg border border-slate-300 bg-white"></textarea>
+            </div>
+          </div>
+
+          <!-- Ação Salvar Diagnóstico -->
+          <div class="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
+            <span class="text-xs text-slate-500">
+              <i class="fa-solid fa-shield-halved text-amber-600 mr-1"></i>
+              O diagnóstico é salvo no CRM e fica **restrito exclusivamente ao Administrador**.
+            </span>
+            <button type="submit" class="w-full sm:w-auto px-6 py-3 text-xs font-extrabold text-white bg-thomaz-navy hover:bg-thomaz-navyDark rounded-xl shadow-md transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-floppy-disk"></i>
+              <span>Salvar Diagnóstico no CRM</span>
+            </button>
+          </div>
+
+        </form>
+
+      </div>
+    </section>
+
+    <section id="tab-confidencial" class="hidden space-y-6">
+      
+      <!-- Banner Exclusivo Admin -->
+      <div class="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-white p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-white text-amber-600 flex items-center justify-center text-xs font-black">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <h2 class="text-base sm:text-lg font-black tracking-wide">Área Restrita do Administrador</h2>
+          </div>
+          <p class="text-xs text-amber-100 mt-1 max-w-2xl">
+            Este banco de dados reúne os formulários preenchidos de Prestação de Serviços e Diagnósticos de Clientes. <strong>Usuários comuns e membros da equipe comercial não têm acesso a esta tela.</strong>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <button onclick="exportConfidentialToCSV()" class="px-3.5 py-2 text-xs font-bold text-amber-900 bg-white rounded-lg shadow-xs hover:bg-amber-50 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-file-export"></i>
+            <span>Exportar Coletas</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Seletor de visualização dos dados confidenciais -->
+      <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <button onclick="switchConfidentialSubTab('subtab-mei')" id="btn-subtab-mei" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-thomaz-navy text-white transition shadow-xs">
+            Prestação de Serviços (<span id="countConfidentialMei">0</span>)
+          </button>
+          <button onclick="switchConfidentialSubTab('subtab-diag')" id="btn-subtab-diag" class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+            Diagnósticos Comerciais (<span id="countConfidentialDiag">0</span>)
+          </button>
+        </div>
+
+        <div class="text-xs text-slate-400 font-medium">
+          <i class="fa-solid fa-user-shield text-amber-600 mr-1"></i> Acesso Restrito: <span class="font-bold text-slate-700">Administrador</span>
+        </div>
+      </div>
+
+      <!-- SUBTAB 1: FORMULÁRIOS MEI RECEBIDOS -->
+      <div id="subtab-mei" class="bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-thomaz-navy">
+            Submissões de Formulários de Prestação de Serviços
+          </h3>
+          <span class="text-xs font-semibold text-slate-500" id="badgeMeiTotalRecords">0 submissões</span>
+        </div>
+
+        <div class="overflow-x-auto min-h-[300px]">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 uppercase text-[10px] font-bold tracking-wider">
+                <th class="py-3 px-4">Protocolo</th>
+                <th class="py-3 px-4">Nome do Titular</th>
+                <th class="py-3 px-4">Telefone / E-mail</th>
+                <th class="py-3 px-4">Gov.br</th>
+                <th class="py-3 px-4">Atividade & Negócio</th>
+                <th class="py-3 px-4">Data Envio</th>
+                <th class="py-3 px-4 text-center">Status</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="confidentialMeiTableBody" class="divide-y divide-slate-200 text-slate-700">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+        
+        <div id="emptyMeiState" class="hidden py-12 text-center text-xs text-slate-400">
+          Nenhum formulário de prestação de serviços recebido até o momento.
+        </div>
+      </div>
+
+      <!-- SUBTAB 2: DIAGNÓSTICOS COMERCIAIS RECEBIDOS -->
+      <div id="subtab-diag" class="hidden bg-white rounded-xl border border-slate-200 shadow-2xs overflow-hidden">
+        <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-thomaz-navy">
+            Diagnósticos Comerciais Salvos
+          </h3>
+          <span class="text-xs font-semibold text-slate-500" id="badgeDiagTotalRecords">0 diagnósticos</span>
+        </div>
+
+        <div class="overflow-x-auto min-h-[300px]">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 uppercase text-[10px] font-bold tracking-wider">
+                <th class="py-3 px-4">Cliente / Razão</th>
+                <th class="py-3 px-4">Telefone</th>
+                <th class="py-3 px-4">CNPJ / Situação</th>
+                <th class="py-3 px-4">Regime Pretendido</th>
+                <th class="py-3 px-4">Faturamento</th>
+                <th class="py-3 px-4">Data</th>
+                <th class="py-3 px-4 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="confidentialDiagTableBody" class="divide-y divide-slate-200 text-slate-700">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="emptyDiagState" class="hidden py-12 text-center text-xs text-slate-400">
+          Nenhum diagnóstico comercial cadastrado até o momento.
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  </div><!-- /#appRoot -->
+
+  <div id="appointmentModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[92vh] overflow-y-auto border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 rounded-t-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-pink-50 text-thomaz-pink flex items-center justify-center font-bold text-base">
+            <i class="fa-solid fa-calendar-plus"></i>
+          </div>
+          <div>
+            <h3 id="appointmentModalTitle" class="text-sm font-bold text-thomaz-navy">Novo Agendamento Comercial</h3>
+            <p class="text-[11px] text-slate-500">Dados alinhados com a planilha oficial do Grupo Rafael Thomaz</p>
+          </div>
+        </div>
+        <button onclick="closeAppointmentModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <form id="appointmentForm" onsubmit="saveAppointment(event)" class="p-6 space-y-4">
+        <input type="hidden" id="appointmentId">
+
+        <div id="memberSelectContainer">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Membro Responsável *</label>
+          <select id="inputMember" required class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy bg-white font-medium">
+          </select>
+          <p id="memberFixedNotice" class="hidden text-[11px] text-slate-500 mt-1 italic">
+            Registrando em nome de: <span id="memberFixedName" class="font-bold text-thomaz-navy"></span>
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nome (Contato / Empresa) *</label>
+            <input type="text" id="inputNome" required placeholder="Ex: Lucas Ferreira - ABC Logística" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">CNPJ</label>
+            <input type="text" id="inputCnpj" oninput="maskCNPJ(this)" placeholder="00.000.000/0000-00" maxlength="18" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
+              <i class="fa-solid fa-phone text-slate-400 mr-1"></i> Telefone (Discador) *
+            </label>
+            <input type="tel" id="inputTelefone" required oninput="maskPhone(this)" placeholder="(11) 99999-9999" maxlength="15" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
+              <i class="fa-brands fa-whatsapp text-emerald-500 mr-1"></i> Whatsapp *
+            </label>
+            <input type="tel" id="inputWhatsapp" required oninput="maskPhone(this)" placeholder="(11) 99999-9999" maxlength="15" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
+              <i class="fa-regular fa-calendar text-slate-400 mr-1"></i> Data Reunião *
+            </label>
+            <input type="date" id="inputDataReuniao" required class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">
+              <i class="fa-regular fa-clock text-slate-400 mr-1"></i> Horario *
+            </label>
+            <input type="time" id="inputHorario" required class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+            <select id="inputStatus" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy bg-white font-medium">
+              <option value="Agendada">Agendada</option>
+              <option value="Confirmada">Confirmada</option>
+              <option value="Realizada">Realizada</option>
+              <option value="No-Show">No-Show (Faltou)</option>
+              <option value="Cancelada">Cancelada</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Motivo da Reunião *</label>
+          <textarea id="inputMotivo" required rows="3" placeholder="Ex: Diagnóstico empresarial, proposta de expansão comercial..." class="w-full text-xs p-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAppointmentModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition">
+            Cancelar
+          </button>
+          <button type="submit" id="btnSubmitAppointment" class="px-5 py-2 text-xs font-bold text-white bg-thomaz-pink hover:bg-thomaz-pinkDark rounded-lg shadow-md shadow-pink-500/20 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-check"></i>
+            <span>Salvar Agendamento</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="confidentialDetailsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-amber-50/80 rounded-t-2xl">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-amber-200 text-amber-900 flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-user-shield"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900" id="confidentialModalTitle">Detalhes Confidenciais da Submissão</h3>
+            <p class="text-[11px] text-amber-800">Visualização exclusiva do Administrador do Grupo Rafael Thomaz</p>
+          </div>
+        </div>
+        <button onclick="closeConfidentialModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs" id="confidentialModalBody">
+        <!-- Dynamically injected -->
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-100 flex justify-end bg-slate-50/80 rounded-b-2xl">
+        <button onclick="closeConfidentialModal()" class="px-4 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Minha Conta -->
+  <div id="switchUserModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 rounded-t-2xl">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-slate-100 text-thomaz-navy flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-circle-user"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-thomaz-navy">Minha Conta</h3>
+            <p class="text-[11px] text-slate-500">Informações da sua conta neste CRM</p>
+          </div>
+        </div>
+        <button onclick="closeSwitchUserModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-3" id="userSwitchListContainer">
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-100 flex justify-between items-center bg-slate-50/80 rounded-b-2xl">
+        <button id="switchModalManageTeamBtn" onclick="openTeamModal()" class="text-xs font-bold text-thomaz-navy hover:underline">
+          <i class="fa-solid fa-users-gear mr-1"></i> Gerenciar Usuários
+        </button>
+        <button onclick="closeSwitchUserModal()" class="px-4 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Gestão de Equipe -->
+  <div id="teamModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 rounded-t-2xl">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-slate-100 text-thomaz-navy flex items-center justify-center font-bold text-sm">
+            <i class="fa-solid fa-users-gear"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-thomaz-navy">Gestão de Usuários da Equipe</h3>
+            <p class="text-[11px] text-slate-500">Cadastre login, senha, cargo e permissão de cada usuário</p>
+          </div>
+        </div>
+        <button onclick="closeTeamModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <form id="newMemberForm" onsubmit="addNewMember(event)" class="space-y-2.5">
+          <label class="block text-xs font-semibold text-slate-700">Adicionar Novo Usuário</label>
+
+          <input type="text" id="newMemberName" required placeholder="Nome completo" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+
+          <div class="flex gap-2">
+            <select id="newMemberRole" class="flex-1 text-xs py-2 px-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy bg-white font-medium">
+              <option value="Usuário">Usuário</option>
+              <option value="Administrador">Administrador</option>
+            </select>
+            <input type="text" id="newMemberCargo" placeholder="Cargo (ex: Vendedor)" class="flex-1 text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy">
+          </div>
+
+          <div class="flex gap-2">
+            <input type="text" id="newMemberUsername" required placeholder="Usuário (login)" autocomplete="off" class="flex-1 text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy font-mono">
+            <input type="password" id="newMemberPassword" required minlength="4" placeholder="Senha" autocomplete="new-password" class="flex-1 text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy font-mono">
+          </div>
+
+          <button type="submit" class="w-full py-2 text-xs font-bold text-white bg-thomaz-navy hover:bg-thomaz-navyDark rounded-lg transition shadow-xs">
+            <i class="fa-solid fa-plus mr-1"></i> Cadastrar Usuário
+          </button>
+        </form>
+
+        <div class="space-y-2 pt-2">
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Usuários Cadastrados</label>
+          <div id="teamListContainer" class="max-h-56 overflow-y-auto space-y-2 divide-y divide-slate-100 pr-1">
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-100 flex justify-end bg-slate-50/80 rounded-b-2xl">
+        <button onclick="closeTeamModal()" class="px-4 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+          Concluir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Redefinir Senha -->
+  <div id="resetPasswordModal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 rounded-t-2xl">
+        <h3 class="text-sm font-bold text-thomaz-navy"><i class="fa-solid fa-key mr-1.5"></i>Redefinir Senha</h3>
+        <button onclick="closeResetPasswordModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+      <form id="resetPasswordForm" onsubmit="submitResetPassword(event)" class="p-6 space-y-3">
+        <p class="text-xs text-slate-500">Defina uma nova senha para <strong id="resetPasswordMemberName"></strong>.</p>
+        <input type="password" id="resetPasswordNew" required minlength="4" placeholder="Nova senha (mín. 4 caracteres)" autocomplete="new-password" class="w-full text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-thomaz-navy font-mono">
+        <button type="submit" class="w-full py-2 text-xs font-bold text-white bg-thomaz-navy hover:bg-thomaz-navyDark rounded-lg transition shadow-xs">Salvar Nova Senha</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Google Sync -->
+  <div id="googleSyncModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+      
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-emerald-50/80 rounded-t-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-base">
+            <i class="fa-solid fa-file-excel"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Integração com Google Planilhas</h3>
+            <p class="text-[11px] text-emerald-800">100% Grátis: agendamentos e cadastros enviados à sua planilha</p>
+          </div>
+        </div>
+        <button onclick="closeGoogleSyncModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 text-xs text-slate-700">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+          <div class="flex items-center gap-2 font-bold text-slate-900 text-xs">
+            <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i>
+            Como funciona a sincronização?
+          </div>
+          <p class="text-[11.5px] leading-relaxed text-slate-600">
+            Cole o código abaixo no <strong>Apps Script</strong> da sua planilha Google para receber os registros em tempo real.
+          </p>
+        </div>
+
+        <div class="relative">
+          <pre class="bg-slate-900 text-emerald-400 p-3 rounded-lg text-[11px] font-mono overflow-x-auto max-h-40 border border-slate-800"><code>// Código completo e comentado em: google-apps-script/Code.gs
+// (arquivo incluído no repositório do GitHub)
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var isMei = data.hasOwnProperty('documentoIdentidade') ||
+              data.hasOwnProperty('atividades');
+  var nomeAba = isMei ? 'Prestação de Serviços' : 'Agendamentos';
+  var sheet = ss.getSheetByName(nomeAba) || ss.insertSheet(nomeAba);
+  sheet.appendRow([
+    data.nome || data.cliente || '', data.cnpj || data.documentoIdentidade || '',
+    data.telefone || data.telefonePessoal || '', data.whatsapp || '',
+    data.dataReuniao || '', data.horario || '',
+    data.motivo || data.atividades || '', data.responsavel || 'Sistema',
+    data.status || 'Cadastrado', new Date()
+  ]);
+  return ContentService.createTextOutput(JSON.stringify({"result":"success"})).setMimeType(ContentService.MimeType.JSON);
+}</code></pre>
+          <button onclick="copyAppsScriptCode()" class="absolute top-2 right-2 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-[10px] font-semibold border border-slate-700 flex items-center gap-1">
+            <i class="fa-regular fa-copy"></i> Copiar Código
+          </button>
+        </div>
+
+        <div class="space-y-2 pt-1 border-t border-slate-200">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-thomaz-pink text-white text-[10px] flex items-center justify-center font-bold">2</span>
+            Cole o Link da sua Planilha Aqui
+          </h4>
+          <div class="flex gap-2">
+            <input type="url" id="googleWebhookUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono">
+            <button onclick="saveGoogleWebhookUrl()" class="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition">
+              Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/80 rounded-b-2xl">
+        <span id="webhookSaveStatus" class="text-xs font-semibold text-slate-500"></span>
+        <button onclick="closeGoogleSyncModal()" class="px-4 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Office 365 Sync -->
+  <div id="office365SyncModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-sky-50/80 rounded-t-2xl">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-bold text-base">
+            <i class="fa-brands fa-microsoft"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Integração com Office 365 (Excel Online / SharePoint)</h3>
+            <p class="text-[11px] text-sky-800">Agendamentos e cadastros enviados automaticamente para sua planilha do Microsoft 365</p>
+          </div>
+        </div>
+        <button onclick="closeOffice365SyncModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-5 text-xs text-slate-700">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+          <div class="flex items-center gap-2 font-bold text-slate-900 text-xs">
+            <i class="fa-solid fa-wand-magic-sparkles text-sky-600"></i>
+            Como funciona a sincronização?
+          </div>
+          <p class="text-[11.5px] leading-relaxed text-slate-600">
+            A Microsoft não permite gravar direto numa planilha Excel a partir do navegador com segurança (exigiria expor uma senha da sua conta no código). O caminho oficial e seguro é usar o <strong>Power Automate</strong> (incluso no seu plano Microsoft 365), criando um fluxo que recebe os dados e grava automaticamente numa tabela do Excel salva no OneDrive ou SharePoint.
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-thomaz-pink text-white text-[10px] flex items-center justify-center font-bold">1</span>
+            Crie o fluxo no Power Automate
+          </h4>
+          <ol class="list-decimal list-inside space-y-1.5 text-[11.5px] leading-relaxed text-slate-600 pl-1">
+            <li>Acesse <strong>make.powerautomate.com</strong> com sua conta Microsoft 365 da empresa.</li>
+            <li>Crie um fluxo <strong>"Automatizado"</strong> com o gatilho <strong>"Quando uma solicitação HTTP for recebida" (When a HTTP request is received)</strong>.</li>
+            <li>Deixe o corpo da solicitação (Request Body JSON Schema) vazio por enquanto — o Power Automate preenche sozinho depois do primeiro envio de teste.</li>
+            <li>Crie (ou use) uma planilha Excel com uma <strong>Tabela</strong> (Inserir → Tabela) salva no OneDrive Empresarial ou numa biblioteca do SharePoint.</li>
+            <li>Adicione a ação <strong>Excel Online (Business) → "Adicionar uma linha numa tabela"</strong>, apontando pra essa planilha e tabela.</li>
+            <li>Mapeie os campos dinâmicos recebidos (nome, telefone, dataReuniao, motivo, status, tipo, etc.) para as colunas da tabela.</li>
+            <li>Salve o fluxo. Copie a <strong>URL da solicitação HTTP POST</strong> gerada (fica em "Quando uma solicitação HTTP for recebida").</li>
+          </ol>
+        </div>
+
+        <div class="space-y-2 pt-1 border-t border-slate-200">
+          <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+            <span class="w-5 h-5 rounded-full bg-thomaz-pink text-white text-[10px] flex items-center justify-center font-bold">2</span>
+            Cole aqui a URL do fluxo (Power Automate)
+          </h4>
+          <div class="flex gap-2">
+            <input type="url" id="office365WebhookUrlInput" placeholder="https://prod-00.brazilsouth.logic.azure.com/workflows/..." class="flex-1 text-xs py-2 px-3 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono">
+            <button onclick="saveOffice365WebhookUrl()" class="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-lg shadow-sm transition">
+              Salvar
+            </button>
+          </div>
+          <p class="text-[10.5px] text-slate-400 leading-relaxed pt-1">
+            Essa URL fica salva apenas neste navegador (não é compartilhada com a Anthropic nem com terceiros). Quem tiver essa URL consegue enviar dados pro seu fluxo — trate-a como uma senha e não a compartilhe publicamente.
+          </p>
+        </div>
+      </div>
+
+      <div class="px-6 py-3 border-t border-slate-100 flex items-center justify-between bg-slate-50/80 rounded-b-2xl">
+        <span id="office365SaveStatus" class="text-xs font-semibold text-slate-500"></span>
+        <button onclick="closeOffice365SyncModal()" class="px-4 py-1.5 text-xs font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container de Toasts -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+  <script>
+    const STORAGE_KEY_APPOINTMENTS = 'thomaz_crm_appointments_v3';
+    const STORAGE_KEY_TEAM = 'thomaz_crm_team_v4';
+    const STORAGE_KEY_ACTIVE_USER = 'thomaz_crm_active_user_v3';
+    const STORAGE_KEY_SESSION = 'thomaz_crm_session_user_v1';
+    const STORAGE_KEY_WEBHOOK = 'thomaz_crm_google_webhook_url';
+    const STORAGE_KEY_OFFICE365_WEBHOOK = 'thomaz_crm_office365_webhook_url';
+    const STORAGE_KEY_MEI_SUBMISSIONS = 'thomaz_crm_mei_submissions_v1';
+    const STORAGE_KEY_DIAGNOSTICOS = 'thomaz_crm_diagnosticos_v1';
+
+    // Observação: como este é um sistema 100% client-side (sem servidor/banco de dados),
+    // as senhas são guardadas apenas com hash SHA-256 no localStorage do navegador.
+    // Isso impede visualizar a senha em texto puro, mas não substitui uma autenticação
+    // de backend real — é um controle de acesso simples, adequado para uso interno.
+    const defaultTeam = [
+      { id: '1', name: 'Rafael Thomaz', role: 'Administrador', cargo: 'Gestor', username: 'GrupoRafaelThomaz', password: 'GRT102030!', email: 'rafael@thomaz.com.br' },
+      { id: '2', name: 'Ana Beatriz', role: 'Usuário', cargo: 'Vendedora', username: 'ana', password: 'ana1234', email: 'ana@thomaz.com.br' },
+      { id: '3', name: 'Carlos Eduardo', role: 'Usuário', cargo: 'Consultor Comercial', username: 'carlos', password: 'carlos1234', email: 'carlos@thomaz.com.br' },
+      { id: '4', name: 'Mariana Lima', role: 'Usuário', cargo: 'Atendimento', username: 'mariana', password: 'mariana1234', email: 'mariana@thomaz.com.br' }
+    ];
+
+    const defaultAppointments = [
+      {
+        id: '101',
+        memberId: '2',
+        nome: 'Logística & Transportes Horizonte',
+        cnpj: '23.456.789/0001-01',
+        telefone: '(11) 98765-4321',
+        whatsapp: '(11) 98765-4321',
+        dataReuniao: getTodayIsoDate(),
+        horario: '14:30',
+        motivo: 'Apresentação comercial e diagnóstico financeiro.',
+        status: 'Agendada'
+      },
+      {
+        id: '102',
+        memberId: '3',
+        nome: 'Indústria Metalúrgica Valença',
+        cnpj: '78.910.112/0001-44',
+        telefone: '(21) 99887-1122',
+        whatsapp: '(21) 99887-1122',
+        dataReuniao: getTodayIsoDate(),
+        horario: '16:00',
+        motivo: 'Alinhamento com diretoria para proposta comercial.',
+        status: 'Confirmada'
+      }
+    ];
+
+    /* Submissões padrão confidenciais (visíveis apenas pelo Admin) */
+    const defaultMeiSubmissions = [
+      {
+        id: 'PS-20260309-8812',
+        nome: 'Marcos Vinicius de Souza',
+        documentoIdentidade: '38.991.201-X, SSP/SP, 12/04/2019',
+        telefonePessoal: '(11) 97123-4567',
+        emailPessoal: 'marcos.vinicius@gmail.com',
+        enderecoResidencial: 'Av. Paulista, 1000, Apto 54',
+        bairro: 'Bela Vista',
+        cidade: 'São Paulo',
+        estado: 'SP',
+        cep: '01310-100',
+        nivelGov: 'Prata ou Ouro',
+        atividades: 'Consultoria e desenvolvimento de software web',
+        formaAtuacao: 'Internet',
+        emailProfissional: 'contato@mvsoftwares.com.br',
+        telefoneComercial: '(11) 97123-4567',
+        enderecoComercial: 'Idem',
+        cepComercial: 'Idem',
+        souEstrangeiro: false,
+        status: 'Pendente',
+        dataEnvio: getTodayIsoDate()
+      }
+    ];
+
+    const defaultDiagnosticos = [
+      {
+        id: 'DIAG-101',
+        cliente: 'TecnoDigital Comércio e Serviços LTDA',
+        telefone: '(11) 98822-1133',
+        possuiEmpresa: true,
+        cnpj: '45.123.987/0001-55',
+        possuiContador: 'Troca de contabilidade',
+        regime: 'Simples Nacional (Média Movimentação)',
+        faturamento: 'R$ 30.000 a R$ 80.000 / mês',
+        notas: '11 a 30 NFs/mês',
+        funcionarios: '1 a 5 Funcionários',
+        regularizar: 'Não',
+        modulos: ['BPO Financeiro', 'Consultoria de Gestão'],
+        observacoes: 'Deseja migrar até o final do trimestre.',
+        dataEnvio: getTodayIsoDate()
+      }
+    ];
+
+    /* Variáveis Globais de Estado */
+    let teamMembers = loadFromStorage(STORAGE_KEY_TEAM, defaultTeam);
+    let appointments = loadFromStorage(STORAGE_KEY_APPOINTMENTS, defaultAppointments);
+    let meiSubmissions = loadFromStorage(STORAGE_KEY_MEI_SUBMISSIONS, defaultMeiSubmissions);
+    let diagnosticos = loadFromStorage(STORAGE_KEY_DIAGNOSTICOS, defaultDiagnosticos);
+    let activeUserId = localStorage.getItem(STORAGE_KEY_ACTIVE_USER) || '1';
+    let googleWebhookUrl = localStorage.getItem(STORAGE_KEY_WEBHOOK) || 'https://script.google.com/macros/s/AKfycbw25ayKmVMXTkb4wJgoyi-3tLQBsAjWdqp0SDXoZa8YYotk_hb9VknDYS_22ncbZSNrMw/exec';
+    let office365WebhookUrl = localStorage.getItem(STORAGE_KEY_OFFICE365_WEBHOOK) || '';
+    let resetPasswordTargetId = null;
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY_TEAM, JSON.stringify(teamMembers));
+      localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(appointments));
+      localStorage.setItem(STORAGE_KEY_MEI_SUBMISSIONS, JSON.stringify(meiSubmissions));
+      localStorage.setItem(STORAGE_KEY_DIAGNOSTICOS, JSON.stringify(diagnosticos));
+      localStorage.setItem(STORAGE_KEY_ACTIVE_USER, activeUserId);
+    }
+
+    function loadFromStorage(key, fallback) {
+      try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+      } catch (e) {
+        return fallback;
+      }
+    }
+
+    function getTodayIsoDate() {
+      const now = new Date();
+      return now.toISOString().split('T')[0];
+    }
+
+    /* Utilitário de hash de senha (SHA-256). Evita guardar senha em texto puro. */
+    async function hashPassword(password) {
+      const enc = new TextEncoder().encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    /* Converte usuários que ainda tenham "password" em texto puro (dados padrão de
+       primeira instalação) para "passwordHash", e remove o texto puro. */
+    async function migrateTeamPasswordsIfNeeded() {
+      let changed = false;
+      for (const m of teamMembers) {
+        if (m.password && !m.passwordHash) {
+          m.passwordHash = await hashPassword(m.password);
+          delete m.password;
+          changed = true;
+        }
+      }
+      if (changed) saveState();
+    }
+
+    function getActiveUser() {
+      return teamMembers.find(m => m.id === activeUserId) || teamMembers[0] || { id: '1', name: 'Rafael Thomaz', role: 'Administrador' };
+    }
+
+    function isAdmin() {
+      const user = getActiveUser();
+      return user.role === 'Administrador';
+    }
+
+    window.onload = async function() {
+      await migrateTeamPasswordsIfNeeded();
+
+      const sessionUserId = localStorage.getItem(STORAGE_KEY_SESSION);
+      const sessionUser = sessionUserId ? teamMembers.find(m => m.id === sessionUserId) : null;
+
+      if (sessionUser) {
+        activeUserId = sessionUser.id;
+        showApp();
+      } else {
+        showLoginScreen();
+      }
+    };
+
+    function showLoginScreen() {
+      document.getElementById('appRoot').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('loginForm').reset();
+      document.getElementById('loginError').classList.add('hidden');
+      setTimeout(() => document.getElementById('loginUsername').focus(), 50);
+    }
+
+    function showApp() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('appRoot').classList.remove('hidden');
+
+      updateUserContextUI();
+      loadTeamSelects();
+      renderTeamList();
+      renderTable();
+      renderConfidentialMeiTable();
+      renderConfidentialDiagTable();
+      updateDashboardCards();
+      updateGoogleSyncUI();
+      updateOffice365SyncUI();
+
+      document.getElementById('inputDataReuniao').value = getTodayIsoDate();
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const usernameInput = document.getElementById('loginUsername');
+      const passwordInput = document.getElementById('loginPassword');
+      const errorBox = document.getElementById('loginError');
+
+      const username = usernameInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      const member = teamMembers.find(m => (m.username || '').toLowerCase() === username);
+      const enteredHash = await hashPassword(password);
+
+      if (!member || enteredHash !== member.passwordHash) {
+        errorBox.textContent = 'Usuário ou senha inválidos.';
+        errorBox.classList.remove('hidden');
+        passwordInput.value = '';
+        return;
+      }
+
+      activeUserId = member.id;
+      localStorage.setItem(STORAGE_KEY_SESSION, activeUserId);
+      saveState();
+      showApp();
+      showToast(`Bem-vindo(a), ${member.name}!`);
+    }
+
+    function logout() {
+      localStorage.removeItem(STORAGE_KEY_SESSION);
+      closeSwitchUserModal();
+      showLoginScreen();
+    }
+
+    function switchAppTab(tabId) {
+      // REGRA DE OURO: A tela 'tab-confidencial' é estritamente restrita ao Administrador!
+      if (tabId === 'tab-confidencial' && !isAdmin()) {
+        showToast('Acesso negado: apenas o Administrador pode visualizar dados confidenciais.', 'error');
+        switchAppTab('tab-agendamentos');
+        return;
+      }
+
+      const tabs = ['tab-agendamentos', 'tab-coleta-mei', 'tab-diagnostico', 'tab-confidencial'];
+      tabs.forEach(t => {
+        const el = document.getElementById(t);
+        const btn = document.getElementById('nav-' + t);
+        if (el) el.classList.add('hidden');
+        if (btn) {
+          if (t === 'tab-confidencial') {
+            btn.className = "app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 text-amber-800 bg-amber-50 border border-amber-300 hover:bg-amber-100 transition";
+          } else {
+            btn.className = "app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 text-slate-600 hover:text-thomaz-navy hover:bg-slate-100 transition";
+          }
+        }
+      });
+
+      const currentEl = document.getElementById(tabId);
+      const currentBtn = document.getElementById('nav-' + tabId);
+
+      if (currentEl) currentEl.classList.remove('hidden');
+      if (currentBtn) {
+        if (tabId === 'tab-confidencial') {
+          currentBtn.className = "app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 bg-amber-600 text-white shadow-xs transition";
+        } else {
+          currentBtn.className = "app-nav-tab px-3 py-2 rounded-lg font-bold flex items-center gap-2 bg-thomaz-navy text-white shadow-xs transition";
+        }
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchConfidentialSubTab(subTabId) {
+      const btnMei = document.getElementById('btn-subtab-mei');
+      const btnDiag = document.getElementById('btn-subtab-diag');
+      const tabMei = document.getElementById('subtab-mei');
+      const tabDiag = document.getElementById('subtab-diag');
+
+      if (subTabId === 'subtab-mei') {
+        tabMei.classList.remove('hidden');
+        tabDiag.classList.add('hidden');
+        btnMei.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-thomaz-navy text-white transition shadow-xs";
+        btnDiag.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+      } else {
+        tabMei.classList.add('hidden');
+        tabDiag.classList.remove('hidden');
+        btnDiag.className = "px-4 py-1.5 rounded-lg text-xs font-bold bg-thomaz-navy text-white transition shadow-xs";
+        btnMei.className = "px-4 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+      }
+    }
+
+    function updateUserContextUI() {
+      const user = getActiveUser();
+      const admin = isAdmin();
+
+      document.getElementById('userNameLabel').textContent = user.name;
+      document.getElementById('userRoleLabel').textContent = user.cargo || user.role;
+      document.getElementById('userAvatarBadge').textContent = user.name.charAt(0).toUpperCase();
+
+      const viewModeBadge = document.getElementById('viewModeBadge');
+      const navConfidential = document.getElementById('nav-tab-confidencial');
+
+      if (admin) {
+        viewModeBadge.className = "hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200";
+        viewModeBadge.innerHTML = `<i class="fa-solid fa-crown text-amber-600"></i> Administrador`;
+        
+        // MOSTRA A ABA CONFIDENCIAL APENAS PARA ADMINISTRADORES
+        if (navConfidential) navConfidential.classList.remove('hidden');
+
+        document.getElementById('adminTeamBtn').classList.remove('hidden');
+        document.getElementById('adminExportBtn').classList.remove('hidden');
+        document.getElementById('filterMemberContainer').classList.remove('hidden');
+        document.getElementById('thResponsavel').classList.remove('hidden');
+        document.getElementById('currentTableModeTag').textContent = "Todas as Prospecções da Equipe";
+
+        document.getElementById('welcomeTitle').innerHTML = `Painel do Gestor <span class="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md">Administrador</span>`;
+        document.getElementById('welcomeSubtitle').textContent = `Acesso total liberado para dados comerciais, equipe e formulários confidenciais.`;
+
+        const userTag = document.getElementById('userRoleIndicatorTag');
+        userTag.className = "px-2.5 py-1 rounded-lg text-xs font-bold border bg-amber-50 text-amber-800 border-amber-200";
+        userTag.innerHTML = `<i class="fa-solid fa-shield-halved mr-1"></i> Acesso Total (Admin)`;
+      } else {
+        viewModeBadge.className = "hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-thomaz-navy border border-blue-200";
+        viewModeBadge.innerHTML = `<i class="fa-solid fa-user text-thomaz-navy"></i> Equipe (${escapeHtml(user.cargo || user.role)})`;
+
+        // OCULTA TOTALMENTE A ABA CONFIDENCIAL PARA OUTROS USUÁRIOS
+        if (navConfidential) navConfidential.classList.add('hidden');
+
+        // Se estiver na aba confidencial e trocar para membro, redireciona
+        const currentActiveSec = document.querySelector('main > section:not(.hidden)');
+        if (currentActiveSec && currentActiveSec.id === 'tab-confidencial') {
+          switchAppTab('tab-agendamentos');
+        }
+
+        document.getElementById('adminTeamBtn').classList.add('hidden');
+        document.getElementById('adminExportBtn').classList.add('hidden');
+        document.getElementById('filterMemberContainer').classList.add('hidden');
+        document.getElementById('thResponsavel').classList.add('hidden');
+        document.getElementById('currentTableModeTag').textContent = `Minhas Prospecções (${user.name})`;
+
+        document.getElementById('welcomeTitle').innerHTML = `Olá, ${escapeHtml(user.name)}! <span class="text-xs bg-pink-100 text-thomaz-pinkDark font-bold px-2 py-0.5 rounded-md">${escapeHtml(user.cargo || user.role)}</span>`;
+        document.getElementById('welcomeSubtitle').textContent = `Aqui estão os seus agendamentos comerciais cadastrados.`;
+
+        const userTag = document.getElementById('userRoleIndicatorTag');
+        userTag.className = "px-2.5 py-1 rounded-lg text-xs font-bold border bg-blue-50 text-thomaz-navy border-blue-200";
+        userTag.innerHTML = `<i class="fa-solid fa-user-check mr-1"></i> Minha Carteira`;
+      }
+
+      // Configuração do modal de agendamento
+      const inputMember = document.getElementById('inputMember');
+      const memberFixedNotice = document.getElementById('memberFixedNotice');
+      const memberFixedName = document.getElementById('memberFixedName');
+
+      if (admin) {
+        inputMember.classList.remove('hidden');
+        memberFixedNotice.classList.add('hidden');
+      } else {
+        inputMember.classList.add('hidden');
+        memberFixedNotice.classList.remove('hidden');
+        memberFixedName.textContent = `${user.name} (${user.cargo || user.role})`;
+      }
+
+      updateConfidentialBadges();
+    }
+
+    function openSwitchUserModal() {
+      const container = document.getElementById('userSwitchListContainer');
+      const user = getActiveUser();
+      const isAdminRole = user.role === 'Administrador';
+
+      container.innerHTML = `
+        <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50">
+          <div class="w-11 h-11 rounded-full ${isAdminRole ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-thomaz-navy'} font-black text-sm flex items-center justify-center flex-shrink-0">
+            ${isAdminRole ? '<i class="fa-solid fa-crown text-amber-600"></i>' : escapeHtml(user.name.charAt(0))}
+          </div>
+          <div class="min-w-0">
+            <div class="font-bold text-sm text-slate-900 truncate">${escapeHtml(user.name)}</div>
+            <div class="text-[11px] text-slate-500 font-medium truncate">${escapeHtml(user.role)}${user.cargo ? ' • ' + escapeHtml(user.cargo) : ''}</div>
+            ${user.username ? `<div class="text-[11px] text-slate-400 font-mono">@${escapeHtml(user.username)}</div>` : ''}
+          </div>
+        </div>
+
+        <button type="button" onclick="logout()" class="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 rounded-lg hover:bg-rose-100 transition">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair da Conta
+        </button>
+      `;
+
+      const manageBtn = document.getElementById('switchModalManageTeamBtn');
+      if (manageBtn) manageBtn.classList.toggle('hidden', !isAdminRole);
+
+      document.getElementById('switchUserModal').classList.remove('hidden');
+    }
+
+    function closeSwitchUserModal() {
+      document.getElementById('switchUserModal').classList.add('hidden');
+    }
+
+    function loadTeamSelects() {
+      const inputMemberSelect = document.getElementById('inputMember');
+      const filterMemberSelect = document.getElementById('filterMember');
+
+      const currentFilter = filterMemberSelect.value;
+      inputMemberSelect.innerHTML = '';
+      filterMemberSelect.innerHTML = '<option value="ALL">Toda a Equipe</option>';
+
+      teamMembers.forEach(member => {
+        const label = `${member.name} (${member.cargo || member.role})`;
+
+        const opt1 = document.createElement('option');
+        opt1.value = member.id;
+        opt1.textContent = label;
+        if (member.id === activeUserId) opt1.selected = true;
+        inputMemberSelect.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = member.id;
+        opt2.textContent = label;
+        filterMemberSelect.appendChild(opt2);
+      });
+
+      if (currentFilter) filterMemberSelect.value = currentFilter;
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('appointmentsTableBody');
+      const emptyState = document.getElementById('emptyState');
+      const countBadge = document.getElementById('resultsCountBadge');
+      const user = getActiveUser();
+      const admin = isAdmin();
+
+      const search = document.getElementById('searchInput').value.toLowerCase().trim();
+      const memberFilter = document.getElementById('filterMember').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+      const periodFilter = document.getElementById('filterPeriod').value;
+      const todayStr = getTodayIsoDate();
+
+      tbody.innerHTML = '';
+
+      const filtered = appointments.filter(item => {
+        if (!admin && item.memberId !== user.id) {
+          return false;
+        }
+
+        const matchSearch = !search || 
+          (item.nome && item.nome.toLowerCase().includes(search)) || 
+          (item.cnpj && item.cnpj.toLowerCase().includes(search)) || 
+          (item.telefone && item.telefone.toLowerCase().includes(search)) ||
+          (item.whatsapp && item.whatsapp.toLowerCase().includes(search)) ||
+          (item.motivo && item.motivo.toLowerCase().includes(search));
+
+        const matchMember = !admin || memberFilter === 'ALL' || item.memberId === memberFilter;
+        const matchStatus = statusFilter === 'ALL' || item.status === statusFilter;
+
+        let matchPeriod = true;
+        if (periodFilter === 'TODAY') {
+          matchPeriod = item.dataReuniao === todayStr;
+        } else if (periodFilter === 'WEEK') {
+          const itemDate = new Date(item.dataReuniao);
+          const now = new Date();
+          const oneWeek = 7 * 24 * 60 * 60 * 1000;
+          matchPeriod = Math.abs(itemDate - now) <= oneWeek;
+        } else if (periodFilter === 'FUTURE') {
+          matchPeriod = item.dataReuniao >= todayStr;
+        }
+
+        return matchSearch && matchMember && matchStatus && matchPeriod;
+      });
+
+      filtered.sort((a, b) => {
+        const d1 = `${a.dataReuniao} ${a.horario}`;
+        const d2 = `${b.dataReuniao} ${b.horario}`;
+        return d1.localeCompare(d2);
+      });
+
+      countBadge.textContent = `${filtered.length} registro${filtered.length !== 1 ? 's' : ''}`;
+
+      if (filtered.length === 0) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+      }
+
+      filtered.forEach(item => {
+        const member = teamMembers.find(m => m.id === item.memberId) || { name: 'Equipe', role: 'Usuário' };
+        
+        const cleanWhatsapp = item.whatsapp ? item.whatsapp.replace(/\D/g, '') : '';
+        const whatsappMsg = `Olá ${item.nome}, tudo bem? Aqui é ${member.name} do Grupo Rafael Thomaz. Gostaria de confirmar nossa reunião!`;
+        const whatsappUrl = `https://wa.me/55${cleanWhatsapp}?text=${encodeURIComponent(whatsappMsg)}`;
+        
+        const cleanTel = item.telefone ? item.telefone.replace(/\D/g, '') : '';
+        const telUrl = `tel:${cleanTel}`;
+
+        let statusBadgeClass = 'bg-slate-100 text-slate-700 border-slate-300';
+        if (item.status === 'Agendada') statusBadgeClass = 'bg-blue-50 text-thomaz-navy border-blue-200 font-bold';
+        else if (item.status === 'Confirmada') statusBadgeClass = 'bg-pink-50 text-thomaz-pinkDark border-pink-200 font-bold';
+        else if (item.status === 'Realizada') statusBadgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200 font-bold';
+        else if (item.status === 'No-Show') statusBadgeClass = 'bg-amber-50 text-amber-700 border-amber-200 font-bold';
+        else if (item.status === 'Cancelada') statusBadgeClass = 'bg-rose-50 text-rose-700 border-rose-200 font-bold';
+
+        const dateParts = item.dataReuniao ? item.dataReuniao.split('-') : [];
+        const formattedDate = dateParts.length === 3 ? `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}` : item.dataReuniao;
+        const isToday = item.dataReuniao === todayStr;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/90 transition group";
+        
+        const responsavelTd = admin ? `
+          <td class="py-3 px-4 whitespace-nowrap">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-full bg-slate-100 text-thomaz-navy border border-slate-200 font-black text-[10px] flex items-center justify-center">
+                ${member.name.charAt(0)}
+              </div>
+              <div>
+                <span class="font-semibold text-slate-800 block leading-tight">${escapeHtml(member.name)}</span>
+                <span class="text-[10px] text-slate-400 font-medium">${escapeHtml(member.cargo || member.role)}</span>
+              </div>
+            </div>
+          </td>
+        ` : '';
+
+        tr.innerHTML = `
+          ${responsavelTd}
+          <td class="py-3 px-4 font-semibold text-slate-900 whitespace-nowrap">
+            ${escapeHtml(item.nome)}
+          </td>
+          <td class="py-3 px-4 text-slate-500 font-mono text-[11px] whitespace-nowrap">
+            ${escapeHtml(item.cnpj || '—')}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <a href="${telUrl}" class="inline-flex items-center gap-1.5 font-medium text-slate-700 hover:text-thomaz-navy bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded transition shadow-2xs" title="Ligar agora">
+              <i class="fa-solid fa-phone text-[10px] text-slate-400"></i>
+              <span>${escapeHtml(item.telefone)}</span>
+            </a>
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-md border border-emerald-200 transition shadow-2xs" title="Abrir WhatsApp">
+              <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i>
+              <span>${escapeHtml(item.whatsapp)}</span>
+            </a>
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <div class="flex items-center gap-1.5">
+              <span class="font-semibold ${isToday ? 'text-thomaz-pink font-bold' : 'text-slate-700'}">${formattedDate}</span>
+              ${isToday ? '<span class="text-[9px] bg-pink-100 text-thomaz-pinkDark font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Hoje</span>' : ''}
+            </div>
+          </td>
+          <td class="py-3 px-4 font-bold text-slate-800 whitespace-nowrap">
+            <i class="fa-regular fa-clock text-[10px] text-slate-400 mr-1"></i>${escapeHtml(item.horario)}
+          </td>
+          <td class="py-3 px-4 max-w-xs truncate text-slate-600" title="${escapeHtml(item.motivo)}">
+            ${escapeHtml(item.motivo)}
+          </td>
+          <td class="py-3 px-4 text-center whitespace-nowrap">
+            <span class="inline-block px-2.5 py-1 text-[11px] rounded-full border ${statusBadgeClass}">
+              ${escapeHtml(item.status)}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-1.5">
+              <button onclick="editAppointment('${item.id}')" class="p-1.5 text-slate-400 hover:text-thomaz-navy hover:bg-slate-100 rounded-md transition" title="Editar">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button onclick="deleteAppointment('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition" title="Excluir">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </div>
+          </td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateDashboardCards() {
+      const todayStr = getTodayIsoDate();
+      const user = getActiveUser();
+      const admin = isAdmin();
+
+      const dataset = admin ? appointments : appointments.filter(a => a.memberId === user.id);
+
+      const total = dataset.length;
+      const todayCount = dataset.filter(a => a.dataReuniao === todayStr).length;
+      const completed = dataset.filter(a => a.status === 'Realizada').length;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statToday').textContent = todayCount;
+      document.getElementById('statCompleted').textContent = completed;
+
+      if (admin) {
+        document.getElementById('statLabelTotal').textContent = "Total de Agendamentos (Equipe)";
+        document.getElementById('statLabelContext').textContent = "Membros na Equipe";
+        document.getElementById('statContextValue').textContent = teamMembers.length;
+        document.getElementById('statContextIcon').className = "fa-solid fa-users";
+      } else {
+        document.getElementById('statLabelTotal').textContent = "Meus Agendamentos";
+        document.getElementById('statLabelContext').textContent = "Minhas Reuniões Concluídas";
+        document.getElementById('statContextValue').textContent = completed;
+        document.getElementById('statContextIcon').className = "fa-solid fa-trophy text-amber-500";
+      }
+    }
+
+    function openAppointmentModal(editId = null) {
+      const form = document.getElementById('appointmentForm');
+      const title = document.getElementById('appointmentModalTitle');
+      const user = getActiveUser();
+      const admin = isAdmin();
+      form.reset();
+
+      if (editId) {
+        const item = appointments.find(a => a.id === editId);
+        if (item) {
+          title.textContent = 'Editar Agendamento';
+          document.getElementById('appointmentId').value = item.id;
+          document.getElementById('inputMember').value = item.memberId;
+          document.getElementById('inputNome').value = item.nome;
+          document.getElementById('inputCnpj').value = item.cnpj;
+          document.getElementById('inputTelefone').value = item.telefone;
+          document.getElementById('inputWhatsapp').value = item.whatsapp;
+          document.getElementById('inputDataReuniao').value = item.dataReuniao;
+          document.getElementById('inputHorario').value = item.horario;
+          document.getElementById('inputMotivo').value = item.motivo;
+          document.getElementById('inputStatus').value = item.status;
+        }
+      } else {
+        title.textContent = 'Novo Agendamento';
+        document.getElementById('appointmentId').value = '';
+        document.getElementById('inputMember').value = admin ? activeUserId : user.id;
+        document.getElementById('inputDataReuniao').value = getTodayIsoDate();
+        document.getElementById('inputStatus').value = 'Agendada';
+      }
+
+      document.getElementById('appointmentModal').classList.remove('hidden');
+    }
+
+    function closeAppointmentModal() {
+      document.getElementById('appointmentModal').classList.add('hidden');
+    }
+
+    async function saveAppointment(e) {
+      e.preventDefault();
+      const id = document.getElementById('appointmentId').value;
+      const user = getActiveUser();
+      const admin = isAdmin();
+
+      const memberId = admin ? document.getElementById('inputMember').value : user.id;
+      const nome = document.getElementById('inputNome').value.trim();
+      const cnpj = document.getElementById('inputCnpj').value.trim();
+      const telefone = document.getElementById('inputTelefone').value.trim();
+      const whatsapp = document.getElementById('inputWhatsapp').value.trim();
+      const dataReuniao = document.getElementById('inputDataReuniao').value;
+      const horario = document.getElementById('inputHorario').value;
+      const motivo = document.getElementById('inputMotivo').value.trim();
+      const status = document.getElementById('inputStatus').value;
+
+      if (!nome || !telefone || !dataReuniao || !horario || !motivo) {
+        showToast('Por favor, preencha todos os campos obrigatórios (*).', 'error');
+        return;
+      }
+
+      const assignedMember = teamMembers.find(m => m.id === memberId) || user;
+
+      const appointmentRecord = {
+        id: id || Date.now().toString(),
+        memberId,
+        nome,
+        cnpj,
+        telefone,
+        whatsapp,
+        dataReuniao,
+        horario,
+        motivo,
+        status,
+        responsavel: assignedMember.name
+      };
+
+      if (id) {
+        const index = appointments.findIndex(a => a.id === id);
+        if (index !== -1) appointments[index] = appointmentRecord;
+      } else {
+        appointments.push(appointmentRecord);
+      }
+
+      saveState();
+
+      if (googleWebhookUrl) {
+        sendToGoogleSheets(appointmentRecord);
+      }
+      if (office365WebhookUrl) {
+        sendToOffice365(appointmentRecord);
+      }
+
+      closeAppointmentModal();
+      renderTable();
+      updateDashboardCards();
+
+      showToast(
+        id ? 'Agendamento atualizado com sucesso!' : 'Novo agendamento salvo com sucesso!',
+        'success'
+      );
+    }
+
+    function editAppointment(id) {
+      openAppointmentModal(id);
+    }
+
+    function deleteAppointment(id) {
+      const item = appointments.find(a => a.id === id);
+      if (!item) return;
+
+      createConfirmDialog(`Deseja realmente remover o agendamento de "${item.nome}"?`, () => {
+        appointments = appointments.filter(a => a.id !== id);
+        saveState();
+        renderTable();
+        updateDashboardCards();
+        showToast('Agendamento excluído.');
+      });
+    }
+
+    function toggleEstrangeiroPanel(show) {
+      const panel = document.getElementById('painelEstrangeiro');
+      if (show) panel.classList.remove('hidden');
+      else panel.classList.add('hidden');
+    }
+
+    async function submitFormMei(e) {
+      e.preventDefault();
+
+      const nivelGovChecked = document.querySelector('input[name="mei_nivelGov"]:checked');
+      if (!nivelGovChecked) {
+        showToast('Selecione o nível da sua conta gov.br para continuar.', 'error');
+        return;
+      }
+
+      const formEl = document.getElementById('formColetaMei');
+      const now = new Date();
+      const rand = Math.floor(Math.random() * 9000 + 1000);
+      const protocolo = 'PS-' + now.getFullYear() +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getDate()).padStart(2, '0') + '-' + rand;
+
+      const payload = {
+        id: protocolo,
+        nome: document.getElementById('mei_nome').value.trim(),
+        documentoIdentidade: document.getElementById('mei_doc').value.trim(),
+        telefonePessoal: document.getElementById('mei_telefone').value.trim(),
+        emailPessoal: document.getElementById('mei_email').value.trim(),
+        enderecoResidencial: document.getElementById('mei_endereco').value.trim(),
+        bairro: document.getElementById('mei_bairro').value.trim(),
+        cidade: document.getElementById('mei_cidade').value.trim(),
+        estado: document.getElementById('mei_estado').value.trim(),
+        cep: document.getElementById('mei_cep').value.trim(),
+        nivelGov: nivelGovChecked.value,
+        atividades: document.getElementById('mei_atividades').value.trim(),
+        formaAtuacao: document.getElementById('mei_formaAtuacao').value,
+        emailProfissional: document.getElementById('mei_emailprof').value.trim(),
+        telefoneComercial: document.getElementById('mei_telprof').value.trim(),
+        enderecoComercial: document.getElementById('mei_endcom').value.trim(),
+        cepComercial: document.getElementById('mei_cepcom').value.trim(),
+        souEstrangeiro: document.getElementById('mei_souEstrangeiro').checked,
+        paisNacionalidade: document.getElementById('mei_pais')?.value.trim() || '',
+        tipoDocPF: document.getElementById('mei_tipoDocPF')?.value || '',
+        numDocPF: document.getElementById('mei_numDocPF')?.value.trim() || '',
+        status: 'Pendente',
+        dataEnvio: getTodayIsoDate()
+      };
+
+      meiSubmissions.unshift(payload);
+      saveState();
+
+      if (googleWebhookUrl) {
+        sendToGoogleSheets({
+          ...payload,
+          tipo: 'COLETA_MEI',
+          motivo: payload.atividades,
+          telefone: payload.telefonePessoal,
+          whatsapp: payload.telefonePessoal,
+          responsavel: 'Coleta Online'
+        });
+      }
+      if (office365WebhookUrl) {
+        sendToOffice365({
+          ...payload,
+          tipo: 'COLETA_MEI',
+          motivo: payload.atividades,
+          telefone: payload.telefonePessoal,
+          whatsapp: payload.telefonePessoal,
+          responsavel: 'Coleta Online'
+        });
+      }
+
+      formEl.classList.add('hidden');
+      const successCard = document.getElementById('sucessoMeiCard');
+      document.getElementById('protocoloGeradoMei').textContent = protocolo;
+      successCard.classList.remove('hidden');
+
+      renderConfidentialMeiTable();
+      updateConfidentialBadges();
+
+      showToast('Formulário enviado com sucesso! Dados protegidos.', 'success');
+    }
+
+    function resetFormMei() {
+      document.getElementById('formColetaMei').reset();
+      document.getElementById('painelEstrangeiro').classList.add('hidden');
+      document.getElementById('sucessoMeiCard').classList.add('hidden');
+      document.getElementById('formColetaMei').classList.remove('hidden');
+    }
+
+    function toggleDiagEmpresa(possui) {
+      const boxSim = document.getElementById('diag_boxPossuiEmpresa');
+      const boxNao = document.getElementById('diag_boxNaoPossuiEmpresa');
+      if (possui) {
+        boxSim.classList.remove('hidden');
+        boxNao.classList.add('hidden');
+      } else {
+        boxSim.classList.add('hidden');
+        boxNao.classList.remove('hidden');
+      }
+    }
+
+    function resetDiagnosticoForm() {
+      document.getElementById('formDiagnosticoComercial').reset();
+      toggleDiagEmpresa(true);
+    }
+
+    async function processarDiagnosticoComercial(e) {
+      e.preventDefault();
+
+      const possuiEmpresa = document.querySelector('input[name="diag_possuiEmpresa"]:checked').value === 'sim';
+      const cliente = document.getElementById('diag_nome').value.trim();
+      const telefone = document.getElementById('diag_telefone').value.trim();
+      const cnpj = document.getElementById('diag_cnpj').value.trim();
+      const ramo = document.getElementById('diag_ramoAbertura').value.trim();
+      const regime = document.getElementById('diag_regime').options[document.getElementById('diag_regime').selectedIndex].text;
+      const faturamento = document.getElementById('diag_faturamento').value;
+      const notas = document.getElementById('diag_notas').value;
+      const funcionarios = document.getElementById('diag_funcionarios').options[document.getElementById('diag_funcionarios').selectedIndex].text;
+      const regularizar = document.getElementById('diag_regularizar').value;
+      const observacoes = document.getElementById('diag_observacoes').value.trim();
+
+      const modulos = [];
+      if (document.getElementById('diag_mod_bpo').checked) modulos.push('BPO Financeiro');
+      if (document.getElementById('diag_mod_consultoria').checked) modulos.push('Consultoria de Gestão');
+      if (document.getElementById('diag_mod_planejamento').checked) modulos.push('Planejamento Tributário');
+      if (document.getElementById('diag_mod_alteracao').checked) modulos.push('Alteração de Sócios / QSA');
+      if (document.getElementById('diag_mod_migracao').checked) modulos.push('Migração de MEI para ME');
+
+      const diagRecord = {
+        id: 'DIAG-' + Date.now().toString().slice(-6),
+        cliente,
+        telefone,
+        possuiEmpresa,
+        cnpj: possuiEmpresa ? cnpj : ramo,
+        possuiContador: document.getElementById('diag_possuiContador').value,
+        regime,
+        faturamento,
+        notas,
+        funcionarios,
+        regularizar,
+        modulos,
+        observacoes,
+        dataEnvio: getTodayIsoDate()
+      };
+
+      diagnosticos.unshift(diagRecord);
+      saveState();
+
+      if (googleWebhookUrl) {
+        sendToGoogleSheets({
+          ...diagRecord,
+          tipo: 'DIAGNOSTICO_COMERCIAL',
+          nome: cliente,
+          whatsapp: telefone,
+          motivo: `Diagnóstico Comercial - ${regime}`
+        });
+      }
+      if (office365WebhookUrl) {
+        sendToOffice365({
+          ...diagRecord,
+          tipo: 'DIAGNOSTICO_COMERCIAL',
+          nome: cliente,
+          whatsapp: telefone,
+          motivo: `Diagnóstico Comercial - ${regime}`
+        });
+      }
+
+      renderConfidentialDiagTable();
+      updateConfidentialBadges();
+
+      showToast('Diagnóstico comercial registrado no CRM!', 'success');
+
+      if (isAdmin()) {
+        switchAppTab('tab-confidencial');
+        switchConfidentialSubTab('subtab-diag');
+      } else {
+        showToast('Diagnóstico encaminhado para a administração com sucesso.');
+        document.getElementById('formDiagnosticoComercial').reset();
+      }
+    }
+
+    function updateConfidentialBadges() {
+      const countMei = meiSubmissions.length;
+      const countDiag = diagnosticos.length;
+
+      const elMei = document.getElementById('countConfidentialMei');
+      const elDiag = document.getElementById('countConfidentialDiag');
+      const badgeMei = document.getElementById('badgeMeiTotalRecords');
+      const badgeDiag = document.getElementById('badgeDiagTotalRecords');
+
+      if (elMei) elMei.textContent = countMei;
+      if (elDiag) elDiag.textContent = countDiag;
+      if (badgeMei) badgeMei.textContent = `${countMei} submissões`;
+      if (badgeDiag) badgeDiag.textContent = `${countDiag} diagnósticos`;
+    }
+
+    function renderConfidentialMeiTable() {
+      const tbody = document.getElementById('confidentialMeiTableBody');
+      const emptyState = document.getElementById('emptyMeiState');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (meiSubmissions.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      meiSubmissions.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+        
+        let statusBadge = "bg-amber-50 text-amber-700 border border-amber-200 font-bold";
+        if (item.status === 'Concluído') statusBadge = "bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold";
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-mono text-[11px] font-bold text-thomaz-navy whitespace-nowrap">
+            ${escapeHtml(item.id)}
+          </td>
+          <td class="py-3 px-4 font-semibold text-slate-900 whitespace-nowrap">
+            ${escapeHtml(item.nome)}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="block font-medium text-slate-800">${escapeHtml(item.telefonePessoal)}</span>
+            <span class="text-[10px] text-slate-400">${escapeHtml(item.emailPessoal)}</span>
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border">
+              ${escapeHtml(item.nivelGov)}
+            </span>
+          </td>
+          <td class="py-3 px-4 max-w-xs truncate text-slate-600" title="${escapeHtml(item.atividades)}">
+            ${escapeHtml(item.atividades)}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap text-slate-500">
+            ${escapeHtml(item.dataEnvio)}
+          </td>
+          <td class="py-3 px-4 text-center whitespace-nowrap">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] ${statusBadge}">
+              ${escapeHtml(item.status || 'Pendente')}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right whitespace-nowrap">
+            <button onclick="viewConfidentialMeiDetails('${item.id}')" class="px-2.5 py-1 text-[11px] font-bold text-thomaz-navy bg-slate-100 hover:bg-slate-200 rounded-md transition shadow-2xs mr-1" title="Ver Detalhes">
+              <i class="fa-solid fa-eye mr-1"></i> Detalhes
+            </button>
+            <button onclick="deleteConfidentialMei('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition" title="Excluir">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderConfidentialDiagTable() {
+      const tbody = document.getElementById('confidentialDiagTableBody');
+      const emptyState = document.getElementById('emptyDiagState');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (diagnosticos.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
+
+      diagnosticos.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition";
+
+        tr.innerHTML = `
+          <td class="py-3 px-4 font-bold text-slate-900 whitespace-nowrap">
+            ${escapeHtml(item.cliente)}
+          </td>
+          <td class="py-3 px-4 text-slate-700 whitespace-nowrap">
+            ${escapeHtml(item.telefone)}
+          </td>
+          <td class="py-3 px-4 text-slate-500 font-mono text-[11px] whitespace-nowrap">
+            ${escapeHtml(item.cnpj || '—')}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap font-medium text-thomaz-navy">
+            ${escapeHtml(item.regime)}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap text-slate-600">
+            ${escapeHtml(item.faturamento)}
+          </td>
+          <td class="py-3 px-4 whitespace-nowrap text-slate-400">
+            ${escapeHtml(item.dataEnvio)}
+          </td>
+          <td class="py-3 px-4 text-right whitespace-nowrap">
+            <button onclick="viewConfidentialDiagDetails('${item.id}')" class="px-2.5 py-1 text-[11px] font-bold text-thomaz-navy bg-slate-100 hover:bg-slate-200 rounded-md transition shadow-2xs mr-1" title="Ver Detalhes">
+              <i class="fa-solid fa-eye mr-1"></i> Detalhes
+            </button>
+            <button onclick="deleteConfidentialDiag('${item.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition" title="Excluir">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function viewConfidentialMeiDetails(id) {
+      if (!isAdmin()) return;
+      const item = meiSubmissions.find(m => m.id === id);
+      if (!item) return;
+
+      document.getElementById('confidentialModalTitle').textContent = `Prestação de Serviços — ${item.nome}`;
+      const body = document.getElementById('confidentialModalBody');
+
+      body.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Protocolo:</span><span class="font-mono font-bold text-thomaz-navy">${escapeHtml(item.id)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Nível gov.br:</span><span class="font-bold text-emerald-700">${escapeHtml(item.nivelGov)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Nome do Titular:</span><span class="font-bold text-slate-800">${escapeHtml(item.nome)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">RG / CNH / Emissão:</span><span class="font-medium text-slate-800">${escapeHtml(item.documentoIdentidade)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Telefone Celular:</span><span class="font-medium text-slate-800">${escapeHtml(item.telefonePessoal)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">E-mail Pessoal:</span><span class="font-medium text-slate-800">${escapeHtml(item.emailPessoal)}</span></div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Endereço Residencial:</span>
+          <p class="font-medium text-slate-800">${escapeHtml(item.enderecoResidencial)} - ${escapeHtml(item.bairro)}, ${escapeHtml(item.cidade)}/${escapeHtml(item.estado)} (CEP: ${escapeHtml(item.cep)})</p>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+          <span class="text-slate-400 block text-[10px] uppercase font-bold">Atividade e Negócio:</span>
+          <p class="font-medium text-slate-800">${escapeHtml(item.atividades)}</p>
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200">
+            <div><span class="text-slate-400 text-[10px] block">Forma de Atuação:</span><span class="font-semibold">${escapeHtml(item.formaAtuacao)}</span></div>
+            <div><span class="text-slate-400 text-[10px] block">Contato Profissional:</span><span class="font-semibold">${escapeHtml(item.telefoneComercial)} | ${escapeHtml(item.emailProfissional)}</span></div>
+          </div>
+          <div><span class="text-slate-400 text-[10px] block">Endereço Comercial:</span><span class="font-medium text-slate-700">${escapeHtml(item.enderecoComercial)} (CEP: ${escapeHtml(item.cepComercial)})</span></div>
+        </div>
+
+        ${item.souEstrangeiro ? `
+          <div class="bg-pink-50 p-3 rounded-xl border border-pink-200 text-slate-800">
+            <span class="font-bold text-[11px] text-thomaz-pinkDark block">Dados de Estrangeiro:</span>
+            <span>País: ${escapeHtml(item.paisNacionalidade || 'Não inf.')} | Doc: ${escapeHtml(item.tipoDocPF || 'Não inf.')} (${escapeHtml(item.numDocPF || 'S/N')})</span>
+          </div>
+        ` : ''}
+
+        <div class="flex items-center justify-between pt-2">
+          <div class="flex items-center gap-2">
+            <label class="font-bold text-slate-600">Alterar Status:</label>
+            <select onchange="updateMeiStatus('${item.id}', this.value)" class="text-xs p-1.5 border rounded-lg bg-white">
+              <option value="Pendente" ${item.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+              <option value="Em Análise" ${item.status === 'Em Análise' ? 'selected' : ''}>Em Análise</option>
+              <option value="Concluído" ${item.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
+            </select>
+          </div>
+          <span class="text-[11px] text-slate-400">Recebido em: ${escapeHtml(item.dataEnvio)}</span>
+        </div>
+      `;
+
+      document.getElementById('confidentialDetailsModal').classList.remove('hidden');
+    }
+
+    function viewConfidentialDiagDetails(id) {
+      if (!isAdmin()) return;
+      const item = diagnosticos.find(d => d.id === id);
+      if (!item) return;
+
+      document.getElementById('confidentialModalTitle').textContent = `Diagnóstico — ${item.cliente}`;
+      const body = document.getElementById('confidentialModalBody');
+
+      body.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Cliente / Razão:</span><span class="font-bold text-slate-900">${escapeHtml(item.cliente)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Telefone / WhatsApp:</span><span class="font-bold text-emerald-700">${escapeHtml(item.telefone)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">CNPJ ou Ramo:</span><span class="font-mono font-medium">${escapeHtml(item.cnpj || 'Não inf.')}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Status Contador:</span><span class="font-medium">${escapeHtml(item.possuiContador)}</span></div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Regime Tributário:</span><span class="font-bold text-thomaz-navy">${escapeHtml(item.regime)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Faturamento Médio:</span><span class="font-semibold">${escapeHtml(item.faturamento)}</span></div>
+          <div><span class="text-slate-400 block text-[10px] uppercase font-bold">Volume NFs:</span><span class="font-semibold">${escapeHtml(item.notas)}</span></div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+          <div class="flex justify-between">
+            <div><span class="text-slate-400 text-[10px] uppercase font-bold block">Funcionários Ativos:</span><span class="font-medium">${escapeHtml(item.funcionarios)}</span></div>
+            <div><span class="text-slate-400 text-[10px] uppercase font-bold block">Regularização:</span><span class="font-medium">${escapeHtml(item.regularizar)}</span></div>
+          </div>
+          <div>
+            <span class="text-slate-400 text-[10px] uppercase font-bold block">Módulos Extras:</span>
+            <span class="font-semibold text-thomaz-navy">${item.modulos && item.modulos.length ? escapeHtml(item.modulos.join(', ')) : 'Nenhum'}</span>
+          </div>
+          ${item.observacoes ? `
+            <div class="pt-2 border-t border-slate-200">
+              <span class="text-slate-400 text-[10px] uppercase font-bold block">Observações:</span>
+              <p class="italic text-slate-600">${escapeHtml(item.observacoes)}</p>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      document.getElementById('confidentialDetailsModal').classList.remove('hidden');
+    }
+
+    function closeConfidentialModal() {
+      document.getElementById('confidentialDetailsModal').classList.add('hidden');
+    }
+
+    function updateMeiStatus(id, newStatus) {
+      const item = meiSubmissions.find(m => m.id === id);
+      if (item) {
+        item.status = newStatus;
+        saveState();
+        renderConfidentialMeiTable();
+        showToast('Status atualizado com sucesso.');
+      }
+    }
+
+    function deleteConfidentialMei(id) {
+      if (!isAdmin()) return;
+      createConfirmDialog('Deseja excluir permanentemente este formulário de prestação de serviços?', () => {
+        meiSubmissions = meiSubmissions.filter(m => m.id !== id);
+        saveState();
+        renderConfidentialMeiTable();
+        updateConfidentialBadges();
+        showToast('Submissão removida.');
+      });
+    }
+
+    function deleteConfidentialDiag(id) {
+      if (!isAdmin()) return;
+      createConfirmDialog('Deseja excluir este diagnóstico comercial?', () => {
+        diagnosticos = diagnosticos.filter(d => d.id !== id);
+        saveState();
+        renderConfidentialDiagTable();
+        updateConfidentialBadges();
+        showToast('Diagnóstico removido.');
+      });
+    }
+
+    function openTeamModal() {
+      if (!isAdmin()) {
+        showToast('Apenas administradores podem gerenciar a equipe.', 'error');
+        return;
+      }
+      renderTeamList();
+      document.getElementById('teamModal').classList.remove('hidden');
+    }
+
+    function closeTeamModal() {
+      document.getElementById('teamModal').classList.add('hidden');
+    }
+
+    async function addNewMember(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById('newMemberName');
+      const roleInput = document.getElementById('newMemberRole');
+      const cargoInput = document.getElementById('newMemberCargo');
+      const usernameInput = document.getElementById('newMemberUsername');
+      const passwordInput = document.getElementById('newMemberPassword');
+
+      const name = nameInput.value.trim();
+      const role = roleInput.value;
+      const cargo = cargoInput.value.trim();
+      const username = usernameInput.value.trim().toLowerCase();
+      const password = passwordInput.value;
+
+      if (!name || !username || !password) return;
+
+      if (password.length < 4) {
+        showToast('A senha deve ter no mínimo 4 caracteres.', 'error');
+        return;
+      }
+
+      if (teamMembers.some(m => (m.username || '').toLowerCase() === username)) {
+        showToast('Já existe um usuário com esse login. Escolha outro nome de usuário.', 'error');
+        return;
+      }
+
+      const passwordHash = await hashPassword(password);
+
+      const newMember = {
+        id: Date.now().toString(),
+        name,
+        role,
+        cargo,
+        username,
+        passwordHash
+      };
+
+      teamMembers.push(newMember);
+      nameInput.value = '';
+      cargoInput.value = '';
+      usernameInput.value = '';
+      passwordInput.value = '';
+
+      saveState();
+      loadTeamSelects();
+      renderTeamList();
+      updateDashboardCards();
+      showToast(`"${name}" cadastrado(a) como ${role}${cargo ? ' — ' + cargo : ''}!`);
+    }
+
+    function removeMember(memberId) {
+      if (teamMembers.length <= 1) {
+        showToast('A equipe deve conter pelo menos 1 usuário.', 'error');
+        return;
+      }
+
+      const member = teamMembers.find(m => m.id === memberId);
+      if (!member) return;
+
+      const adminCount = teamMembers.filter(m => m.role === 'Administrador').length;
+      if (member.role === 'Administrador' && adminCount <= 1) {
+        showToast('É necessário manter ao menos 1 Administrador na equipe.', 'error');
+        return;
+      }
+
+      createConfirmDialog(`Deseja remover ${member.name}?`, () => {
+        teamMembers = teamMembers.filter(m => m.id !== memberId);
+
+        if (activeUserId === memberId) {
+          activeUserId = teamMembers[0].id;
+          // Se o próprio usuário logado foi removido, força novo login
+          localStorage.removeItem(STORAGE_KEY_SESSION);
+        }
+
+        saveState();
+        loadTeamSelects();
+        renderTeamList();
+        renderTable();
+        updateDashboardCards();
+        showToast('Usuário removido da equipe.');
+
+        if (!localStorage.getItem(STORAGE_KEY_SESSION)) {
+          closeTeamModal();
+          closeSwitchUserModal();
+          showLoginScreen();
+        } else {
+          updateUserContextUI();
+        }
+      });
+    }
+
+    function openResetPasswordModal(memberId) {
+      const member = teamMembers.find(m => m.id === memberId);
+      if (!member) return;
+      resetPasswordTargetId = memberId;
+      document.getElementById('resetPasswordMemberName').textContent = member.name;
+      document.getElementById('resetPasswordForm').reset();
+      document.getElementById('resetPasswordModal').classList.remove('hidden');
+    }
+
+    function closeResetPasswordModal() {
+      document.getElementById('resetPasswordModal').classList.add('hidden');
+      resetPasswordTargetId = null;
+    }
+
+    async function submitResetPassword(e) {
+      e.preventDefault();
+      const member = teamMembers.find(m => m.id === resetPasswordTargetId);
+      if (!member) return;
+
+      const newPassword = document.getElementById('resetPasswordNew').value;
+      if (newPassword.length < 4) {
+        showToast('A senha deve ter no mínimo 4 caracteres.', 'error');
+        return;
+      }
+
+      member.passwordHash = await hashPassword(newPassword);
+      saveState();
+      closeResetPasswordModal();
+      showToast(`Senha de ${member.name} redefinida com sucesso.`);
+    }
+
+    function renderTeamList() {
+      const container = document.getElementById('teamListContainer');
+      container.innerHTML = '';
+
+      teamMembers.forEach(m => {
+        const count = appointments.filter(a => a.memberId === m.id).length;
+        const isAdm = m.role === 'Administrador';
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between py-2 px-1 text-xs gap-2";
+        div.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-full ${isAdm ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-thomaz-navy'} font-bold flex items-center justify-center text-xs flex-shrink-0">
+              ${isAdm ? '<i class="fa-solid fa-crown text-[10px] text-amber-600"></i>' : escapeHtml(m.name.charAt(0))}
+            </div>
+            <div class="min-w-0">
+              <span class="font-bold text-slate-800 block leading-tight truncate">${escapeHtml(m.name)}</span>
+              <span class="text-[10px] text-slate-500 font-medium block truncate">${escapeHtml(m.role)}${m.cargo ? ' • ' + escapeHtml(m.cargo) : ''} ${m.username ? '• @' + escapeHtml(m.username) : ''} • ${count} agendamento(s)</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 flex-shrink-0">
+            <button onclick="openResetPasswordModal('${m.id}')" class="text-slate-400 hover:text-thomaz-navy p-1.5 rounded hover:bg-slate-100 transition" title="Redefinir senha">
+              <i class="fa-solid fa-key"></i>
+            </button>
+            <button onclick="removeMember('${m.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 rounded hover:bg-rose-50 transition" title="Remover Usuário">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openGoogleSyncModal() {
+      document.getElementById('googleWebhookUrlInput').value = googleWebhookUrl;
+      updateGoogleSyncUI();
+      document.getElementById('googleSyncModal').classList.remove('hidden');
+    }
+
+    function closeGoogleSyncModal() {
+      document.getElementById('googleSyncModal').classList.add('hidden');
+    }
+
+    function saveGoogleWebhookUrl() {
+      const input = document.getElementById('googleWebhookUrlInput');
+      const statusLabel = document.getElementById('webhookSaveStatus');
+      const val = input.value.trim();
+
+      googleWebhookUrl = val;
+      localStorage.setItem(STORAGE_KEY_WEBHOOK, val);
+
+      updateGoogleSyncUI();
+
+      if (val) {
+        statusLabel.textContent = 'Conexão salva com sucesso!';
+        statusLabel.className = 'text-xs font-bold text-emerald-600';
+        showToast('Integração com o Google Planilhas ativada!');
+      } else {
+        statusLabel.textContent = 'Conexão desativada.';
+        statusLabel.className = 'text-xs font-medium text-slate-400';
+        showToast('Envio para Google Sheets desativado.');
+      }
+    }
+
+    function updateGoogleSyncUI() {
+      const banner = document.getElementById('googleSheetsNoticeBanner');
+      const indicator = document.getElementById('googleSyncIndicator');
+      const text = document.getElementById('googleSyncText');
+
+      if (googleWebhookUrl) {
+        banner.classList.add('hidden');
+        indicator.className = "w-2 h-2 rounded-full bg-emerald-500 pulse-dot";
+        text.textContent = "Google Planilhas Conectado";
+        text.className = "hidden xl:inline font-bold text-emerald-700";
+      } else {
+        banner.classList.remove('hidden');
+        indicator.className = "w-2 h-2 rounded-full bg-amber-400";
+        text.textContent = "Conectar Google Planilhas";
+        text.className = "hidden xl:inline text-slate-700";
+      }
+    }
+
+    async function sendToGoogleSheets(record) {
+      if (!googleWebhookUrl) return;
+      try {
+        await fetch(googleWebhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record)
+        });
+        showToast('Dados sincronizados com o Google Planilhas!', 'success');
+      } catch (error) {
+        console.warn('Erro ao sincronizar:', error);
+      }
+    }
+
+    function openOffice365SyncModal() {
+      document.getElementById('office365WebhookUrlInput').value = office365WebhookUrl;
+      updateOffice365SyncUI();
+      document.getElementById('office365SyncModal').classList.remove('hidden');
+    }
+
+    function closeOffice365SyncModal() {
+      document.getElementById('office365SyncModal').classList.add('hidden');
+    }
+
+    function saveOffice365WebhookUrl() {
+      const input = document.getElementById('office365WebhookUrlInput');
+      const statusLabel = document.getElementById('office365SaveStatus');
+      const val = input.value.trim();
+
+      office365WebhookUrl = val;
+      localStorage.setItem(STORAGE_KEY_OFFICE365_WEBHOOK, val);
+
+      updateOffice365SyncUI();
+
+      if (val) {
+        statusLabel.textContent = 'Conexão salva com sucesso!';
+        statusLabel.className = 'text-xs font-bold text-sky-600';
+        showToast('Integração com o Office 365 ativada!');
+      } else {
+        statusLabel.textContent = 'Conexão desativada.';
+        statusLabel.className = 'text-xs font-medium text-slate-400';
+        showToast('Envio para Office 365 desativado.');
+      }
+    }
+
+    function updateOffice365SyncUI() {
+      const indicator = document.getElementById('office365SyncIndicator');
+      const text = document.getElementById('office365SyncText');
+
+      if (office365WebhookUrl) {
+        indicator.className = "w-2 h-2 rounded-full bg-emerald-500 pulse-dot";
+        text.textContent = "Office 365 Conectado";
+        text.className = "hidden xl:inline font-bold text-sky-700";
+      } else {
+        indicator.className = "w-2 h-2 rounded-full bg-amber-400";
+        text.textContent = "Conectar Office 365";
+        text.className = "hidden xl:inline text-slate-700";
+      }
+    }
+
+    async function sendToOffice365(record) {
+      if (!office365WebhookUrl) return;
+      try {
+        await fetch(office365WebhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(record)
+        });
+        showToast('Dados sincronizados com o Office 365!', 'success');
+      } catch (error) {
+        console.warn('Erro ao sincronizar com Office 365:', error);
+      }
+    }
+
+    function copyAppsScriptCode() {
+      const code = `// Código completo em google-apps-script/Code.gs (neste mesmo pacote de implantação)
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var isMei = data.hasOwnProperty('documentoIdentidade') || data.hasOwnProperty('enderecoResidencial') || data.tipo === 'COLETA_MEI';
+    var isDiagnostico = data.tipo === 'DIAGNOSTICO_COMERCIAL' || data.hasOwnProperty('faturamento') || data.hasOwnProperty('regime');
+    if (isMei) {
+      gravarColetaMei(ss, data);
+    } else if (isDiagnostico) {
+      gravarDiagnostico(ss, data);
+    } else {
+      gravarAgendamento(ss, data);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ result: 'success' })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ result: 'error', message: err.message })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function gravarAgendamento(ss, data) {
+  var nomeAba = 'Agendamentos';
+  var sheet = ss.getSheetByName(nomeAba);
+  if (!sheet) {
+    sheet = ss.insertSheet(nomeAba);
+    sheet.appendRow(['Nome','CNPJ','Telefone','Whatsapp','Data Reunião','Horário','Motivo','Responsável','Status','Data de Envio']);
+    sheet.setFrozenRows(1);
+  }
+  sheet.appendRow([
+    data.nome || data.cliente || '', data.cnpj || '', data.telefone || '', data.whatsapp || '',
+    data.dataReuniao || '', data.horario || '', data.motivo || data.atividades || '',
+    data.responsavel || 'Sistema', data.status || 'Cadastrado', new Date()
+  ]);
+}
+
+function gravarColetaMei(ss, data) {
+  var nomeAba = 'Prestação de Serviços';
+  var sheet = ss.getSheetByName(nomeAba);
+  if (!sheet) {
+    sheet = ss.insertSheet(nomeAba);
+    sheet.appendRow(['Protocolo','Nome','Documento','Telefone','Email','Endereço','Bairro','Cidade','UF','CEP','GovBR','Atividades','Status','Data de Envio']);
+    sheet.setFrozenRows(1);
+  }
+  sheet.appendRow([
+    data.id || '', data.nome || '', data.documentoIdentidade || '', data.telefonePessoal || '',
+    data.emailPessoal || '', data.enderecoResidencial || '', data.bairro || '', data.cidade || '',
+    data.estado || '', data.cep || '', data.nivelGov || '', data.atividades || '',
+    data.status || 'Cadastrado', new Date()
+  ]);
+}
+
+function gravarDiagnostico(ss, data) {
+  var nomeAba = 'Diagnósticos Comerciais';
+  var sheet = ss.getSheetByName(nomeAba);
+  if (!sheet) {
+    sheet = ss.insertSheet(nomeAba);
+    sheet.appendRow(['Cliente','Telefone','CNPJ / Ramo','Possui Contador','Regime Tributário','Faturamento','Notas Fiscais','Funcionários','Regularização','Módulos Extras','Observações','Data de Envio']);
+    sheet.setFrozenRows(1);
+  }
+  sheet.appendRow([
+    data.cliente || data.nome || '', data.telefone || data.whatsapp || '', data.cnpj || '',
+    data.possuiContador || '', data.regime || '', data.faturamento || '', data.notas || '',
+    data.funcionarios || '', data.regularizar || '',
+    (data.modulos && data.modulos.join) ? data.modulos.join(', ') : (data.modulos || ''),
+    data.observacoes || '', new Date()
+  ]);
+}
+
+function doGet(e) {
+  return ContentService.createTextOutput('CRM Grupo Rafael Thomaz: endpoint ativo. Use POST para enviar dados.');
+}`;
+      const el = document.createElement('textarea');
+      el.value = code;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+      showToast('Código copiado para a área de transferência!');
+    }
+
+    function exportToCSV() {
+      if (!isAdmin()) {
+        showToast('Apenas administradores podem exportar.', 'error');
+        return;
+      }
+      if (appointments.length === 0) {
+        showToast('Não há agendamentos para exportar.', 'error');
+        return;
+      }
+
+      const headers = ["Nome", "CNPJ", "Telefone", "Whatsapp", "Data Reunião", "Horario", "Motivo", "Responsável", "Status"];
+      const rows = appointments.map(item => {
+        const member = teamMembers.find(m => m.id === item.memberId);
+        const memberName = member ? member.name : 'Equipe';
+        return [
+          `"${(item.nome || '').replace(/"/g, '""')}"`,
+          `"${(item.cnpj || '').replace(/"/g, '""')}"`,
+          `"${(item.telefone || '').replace(/"/g, '""')}"`,
+          `"${(item.whatsapp || '').replace(/"/g, '""')}"`,
+          `"${(item.dataReuniao || '').replace(/"/g, '""')}"`,
+          `"${(item.horario || '').replace(/"/g, '""')}"`,
+          `"${(item.motivo || '').replace(/"/g, '""')}"`,
+          `"${memberName.replace(/"/g, '""')}"`,
+          `"${(item.status || '').replace(/"/g, '""')}"`
+        ];
+      });
+
+      downloadCSV(headers, rows, `AGENDAMENTOS_${getTodayIsoDate()}.csv`);
+      showToast('Relatório de Agendamentos baixado com sucesso!');
+    }
+
+    function exportConfidentialToCSV() {
+      if (!isAdmin()) {
+        showToast('Apenas administradores podem exportar dados confidenciais.', 'error');
+        return;
+      }
+
+      const headers = ["Protocolo", "Nome", "Documento", "Telefone", "Email", "Endereco", "Bairro", "Cidade", "UF", "CEP", "GovBR", "Atividade", "Status", "DataEnvio"];
+      const rows = meiSubmissions.map(item => [
+        `"${item.id}"`,
+        `"${(item.nome || '').replace(/"/g, '""')}"`,
+        `"${(item.documentoIdentidade || '').replace(/"/g, '""')}"`,
+        `"${(item.telefonePessoal || '').replace(/"/g, '""')}"`,
+        `"${(item.emailPessoal || '').replace(/"/g, '""')}"`,
+        `"${(item.enderecoResidencial || '').replace(/"/g, '""')}"`,
+        `"${(item.bairro || '').replace(/"/g, '""')}"`,
+        `"${(item.cidade || '').replace(/"/g, '""')}"`,
+        `"${(item.estado || '').replace(/"/g, '""')}"`,
+        `"${(item.cep || '').replace(/"/g, '""')}"`,
+        `"${(item.nivelGov || '').replace(/"/g, '""')}"`,
+        `"${(item.atividades || '').replace(/"/g, '""')}"`,
+        `"${(item.status || '').replace(/"/g, '""')}"`,
+        `"${(item.dataEnvio || '').replace(/"/g, '""')}"`
+      ]);
+
+      downloadCSV(headers, rows, `PRESTACAO_SERVICOS_CONFIDENCIAL_${getTodayIsoDate()}.csv`);
+      showToast('Relatório confidencial exportado com sucesso!');
+    }
+
+    function downloadCSV(headers, rows, filename) {
+      const csvContent = "﻿" + [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function maskCNPJ(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 14) value = value.slice(0, 14);
+
+      if (value.length > 12) {
+        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+      } else if (value.length > 8) {
+        value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+      } else if (value.length > 5) {
+        value = value.replace(/^(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      } else if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d{1,3})/, '$1.$2');
+      }
+      input.value = value;
+    }
+
+    function maskPhone(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value.length > 11) value = value.slice(0, 11);
+
+      if (value.length > 10) {
+        value = value.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3');
+      } else if (value.length > 5) {
+        value = value.replace(/^(\d{2})(\d{4})(\d{0,4})$/, '($1) $2-$3');
+      } else if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d{0,5})$/, '($1) $2');
+      }
+      input.value = value;
+    }
+
+    function resetFilters() {
+      document.getElementById('searchInput').value = '';
+      document.getElementById('filterMember').value = 'ALL';
+      document.getElementById('filterStatus').value = 'ALL';
+      document.getElementById('filterPeriod').value = 'ALL';
+      renderTable();
+      showToast('Filtros restaurados.');
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const isError = type === 'error';
+      toast.className = `flex items-center gap-2 px-4 py-2.5 rounded-xl shadow-lg border text-xs font-semibold text-white transition-all transform duration-200 translate-y-2 pointer-events-auto ${
+        isError ? 'bg-rose-600 border-rose-700' : 'bg-slate-900 border-slate-800'
+      }`;
+      
+      const icon = isError ? 'fa-circle-exclamation' : 'fa-circle-check text-pink-400';
+      toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${escapeHtml(message)}</span>`;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2');
+        toast.classList.add('translate-y-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => toast.remove(), 200);
+      }, 3500);
+    }
+
+    function createConfirmDialog(question, onConfirm) {
+      const existing = document.getElementById('customConfirmModal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'customConfirmModal';
+      modal.className = 'fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 border border-slate-100 animate-in fade-in zoom-in-95 duration-150">
+          <div class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto text-lg">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <div class="text-center">
+            <h4 class="text-sm font-bold text-slate-900">Confirmação</h4>
+            <p class="text-xs text-slate-600 mt-1">${escapeHtml(question)}</p>
+          </div>
+          <div class="flex items-center justify-center gap-2 pt-2">
+            <button id="cancelConfirmBtn" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition">
+              Cancelar
+            </button>
+            <button id="okConfirmBtn" class="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition">
+              Confirmar
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      document.getElementById('cancelConfirmBtn').onclick = () => modal.remove();
+      document.getElementById('okConfirmBtn').onclick = () => {
+        modal.remove();
+        onConfirm();
+      };
+    }
+  </script>
+</body>
+</html>
